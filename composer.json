@@ -1,0 +1,36 @@
+{
+    "name": "phphone/phphone",
+    "description": "A framework for Phone System Development with PHP using Asterisk ARI",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mike Knooihuisen",
+            "email": "mike@simplysolutionscoding.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+
+    "repositories": [
+	{
+      "type": "path",
+      "url": "../core"
+	}
+    ],
+
+    "autoload": {
+      "psr-0": {
+        "PHPhone\\PHPhone": "src/"
+      },
+      "files": [
+        "src/PHPhone/PHPhone/functions.php"
+      ]
+    },
+
+    "require": {
+	"phphone/core": "*",
+        "symfony/console": "^4.1",
+        "symfony/filesystem": "^4.1",
+        "vlucas/phpdotenv": "^2.5"
+    }
+}
