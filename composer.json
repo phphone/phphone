@@ -28,7 +28,7 @@
     },
 
     "require": {
-	"phphone/core": "*",
+	    "phphone/core": "*",
         "symfony/console": "^4.1",
         "symfony/filesystem": "^4.1",
         "vlucas/phpdotenv": "^2.5"
