@@ -1,0 +1,152 @@
+/* Base Reset & CSS Variables for Dynamic Contrast */
+:root {
+    --title-gradient: linear-gradient(135deg, #ffffff 0%, #a0a5b1 100%);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --btn-bg: rgba(255, 255, 255, 0.08);
+    --btn-border: rgba(255, 255, 255, 0.2);
+    --btn-hover: rgba(255, 255, 255, 0.15);
+}
+
+/* Theme applied when background is LIGHT */
+.theme-light-bg {
+    --title-gradient: linear-gradient(135deg, #121212 0%, #4a4a4a 100%);
+    --text-primary: #121212;
+    --text-secondary: rgba(0, 0, 0, 0.7);
+    --card-bg: rgba(0, 0, 0, 0.08);
+    --card-border: rgba(0, 0, 0, 0.2);
+    --btn-bg: rgba(0, 0, 0, 0.1);
+    --btn-border: rgba(0, 0, 0, 0.3);
+    --btn-hover: rgba(0, 0, 0, 0.2);
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Quita el recuadro azul al tocar en Android */
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background-color: #0d0d12;
+    color: var(--text-primary);
+    overflow: hidden; /* Prevent scrolling for app-like feel */
+}
+
+/* Typography */
+h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: -1px;
+    background: var(--title-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0px 4px 20px rgba(0,0,0,0.1);
+    transition: background 0.5s ease;
+}
+
+p.subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+    transition: color 0.5s ease;
+}
+
+/* Layout */
+.phphone-viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.gradient-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(135deg, #161623, #0a0a10); /* Elegant dark initial background */
+}
+
+/* Glassmorphism Card */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 3rem 2rem;
+    text-align: center;
+    z-index: 10;
+    width: 85%;
+    max-width: 380px;
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.4);
+    animation: floatIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    transition: all 0.5s ease;
+}
+
+/* Premium Button */
+.btn-premium {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    border: none;
+    border-radius: 50px;
+    background: var(--btn-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--btn-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    outline: none;
+    -webkit-user-select: none; /* Evita que el texto se seleccione */
+    user-select: none;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-premium:hover {
+    background: var(--btn-hover);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    transform: translateY(-3px);
+    border: 1px solid var(--btn-border);
+}
+
+.btn-premium:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-premium:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Micro-animations */
+@keyframes floatIn {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.92);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

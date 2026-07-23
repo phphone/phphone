@@ -1,0 +1,52 @@
+name: Phphone
+options:
+  bundleIdPrefix: com.phphone
+targets:
+  Phphone:
+    type: application
+    platform: iOS
+    deploymentTarget: "12.0"
+    sources:
+      - path: App
+    prebuildScripts:
+      - name: Phphone Sync Assets
+        script: |
+          TARGET_DIR="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/src"
+          SRC_DIR="${PHPHONE_SRC_DIR:-${SRCROOT}/../src}"
+          echo "Syncing Phphone Assets from ${SRC_DIR} to ${TARGET_DIR}"
+          rm -rf "${TARGET_DIR}"
+          mkdir -p "${TARGET_DIR}"
+          cp -R "${SRC_DIR}/"* "${TARGET_DIR}/"
+    settings:
+      base:
+        INFOPLIST_FILE: App/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.phphone.Phphone
+        SWIFT_OBJC_BRIDGING_HEADER: App/Bridging-Header.h
+        HEADER_SEARCH_PATHS: 
+          - "$(SRCROOT)/build_ios/iphoneos-arm64/include/php"
+          - "$(SRCROOT)/build_ios/iphoneos-arm64/include/php/main"
+          - "$(SRCROOT)/build_ios/iphoneos-arm64/include/php/Zend"
+          - "$(SRCROOT)/build_ios/iphoneos-arm64/include/php/TSRM"
+        LIBRARY_SEARCH_PATHS:
+          - "$(SRCROOT)/build_ios/openssl-$(PLATFORM_NAME)-arm64/lib"
+          - "$(SRCROOT)/build_ios/curl-$(PLATFORM_NAME)-arm64/lib"
+        ENABLE_BITCODE: "NO"
+        OTHER_LDFLAGS:
+          - "-lresolv"
+          - "-lsqlite3"
+          - "-lz"
+          - "-lssl"
+          - "-lcrypto"
+          - "-lcurl"
+    dependencies:
+      - framework: build_ios/universal/libphp.xcframework
+        embed: false
+# --- PUSH NOTIFICATIONS (PHPHONE) ---
+# Para activar Firebase, descomenta las siguientes líneas y añade tu GoogleService-Info.plist
+#      - package: firebase-ios-sdk
+#        product: FirebaseMessaging
+#
+#packages:
+#  firebase-ios-sdk:
+#    url: https://github.com/firebase/firebase-ios-sdk
+#    from: 10.29.0

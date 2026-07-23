@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">kie.local</domain>
+    </domain-config>
+    <!-- Phphone default to allow all cleartext to enable P2P and local embedded server -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

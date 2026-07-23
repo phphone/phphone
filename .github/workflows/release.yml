@@ -1,0 +1,26 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release and Upload ZIP
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create ZIP file
+        run: zip -r phphone-release.zip . -x "*.git*" -x ".github/*" -x "node_modules/*"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: phphone-release.zip
+          generate_release_notes: true
