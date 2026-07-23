@@ -152,6 +152,16 @@ body {
 ```
 
 <a id="installation"></a>
+## ⚙️ Prerequisites (Development Environment)
+
+Since Phphone compiles true native applications, it is **mandatory** to have the operating systems' build tools installed on your computer. Without them, the CLI will not be able to compile your code.
+
+- **PHP 8.0+** installed in your terminal (required to run the CLI).
+- **For Android:** [Android Studio](https://developer.android.com/studio) installed (with the Android SDK and a configured Emulator).
+- **For iOS:** A Mac with [Xcode](https://developer.apple.com/xcode/) installed (and Command Line Tools active).
+
+---
+
 ## 🛠️ Installation and Usage (CLI)
 
 Phphone includes a smart, global Command Line Interface (CLI).
