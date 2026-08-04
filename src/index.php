@@ -101,6 +101,12 @@ if (strpos($uri, 'action=') !== false) {
         return;
     }
 
+    if (strpos($uri, 'action=daemon') !== false) {
+        $success = \Phphone\Device::startDaemon('daemon', 60);
+        echo json_encode(['success' => $success]);
+        return;
+    }
+
     if (strpos($uri, 'action=network') !== false) {
         $status = \Phphone\Device::network();
         echo json_encode(['success' => true, 'status' => $status]);
@@ -176,144 +182,10 @@ if (strpos($uri, 'action=') !== false) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Phphone Hardware Test</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --text-color: #f8fafc;
-            --primary: #3b82f6;
-            --secondary: #8b5cf6;
-            --danger: #ef4444;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            margin: 0;
-            padding: calc(2rem + env(safe-area-inset-top)) 2rem calc(2rem + env(safe-area-inset-bottom)) 2rem;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; /* Evita que el contenido superior se corte */
-            overflow-x: hidden; /* Permitimos el scroll vertical nativo */
-            overscroll-behavior-y: none; /* Evita el rebote elástico (scroll bounce) */
-            touch-action: manipulation; /* Desactiva el doble toque para hacer zoom */
-        }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 2.5rem;
-            margin: 0;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
-        }
-
-        p.subtitle {
-            text-align: center;
-            color: #94a3b8;
-            margin-top: -1rem;
-            font-size: 1.1rem;
-        }
-
-        .btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 1.5rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 20px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-toast {
-            border-left: 4px solid var(--primary);
-        }
-
-        .btn-vibrate {
-            border-left: 4px solid var(--danger);
-        }
-
-        .btn-gps {
-            border-left: 4px solid #38bdf8;
-            background: rgba(56, 189, 248, 0.05);
-        }
-
-        .btn-camera {
-            border-left: 4px solid #a78bfa;
-            background: rgba(167, 139, 250, 0.05);
-        }
-
-        .btn-notification {
-            border-left: 4px solid #fb923c;
-            background: rgba(251, 146, 60, 0.05);
-        }
-
-        .btn-biometric {
-            border-left: 4px solid #14b8a6;
-            background: rgba(20, 184, 166, 0.05);
-        }
-
-        .btn-gallery {
-            border-left: 4px solid #ec4899;
-            background: rgba(236, 72, 153, 0.05);
-        }
-
-        .btn-hardware {
-            border-left: 4px solid #eab308;
-            background: rgba(234, 179, 8, 0.05);
-        }
-
-        .status-text {
-            text-align: center;
-            color: #10b981;
-            font-weight: 500;
-            padding: 10px;
-            border-radius: 12px;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-height: 200px;
-            overflow-y: auto;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .status-success { display: block; color: #10b981; }
-        .status-error { display: block; color: var(--danger); }
-        .status-loading { display: block; color: #eab308; }
-    </style>
+    <link rel="stylesheet" href="/css/index.css">
 </head>
 
-<body>
+<body class="index-page">
 
     <main class="container">
         <div>
@@ -384,6 +256,10 @@ if (strpos($uri, 'action=') !== false) {
 
         <button class="btn btn-hardware" onclick="triggerHardware('contacts')">
             👥 Ver Agenda (Contactos)
+        </button>
+
+        <button class="btn btn-hardware" onclick="triggerHardware('daemon')">
+            👻 Iniciar Demonio (Background Task)
         </button>
 
         <a href="/newgradient.php" class="btn" style="text-decoration: none; justify-content: center; background: rgba(255,255,255,0.1); color: #fff;">
@@ -519,6 +395,19 @@ if (strpos($uri, 'action=') !== false) {
                     statusEl.innerText = `🔦 Linterna: ${flashState ? 'Encendida' : 'Apagada'}`;
                 } else if (action === 'info') {
                     statusEl.innerText = `📱 Dispositivo: ${data.data.model} (OS: ${data.data.os_version})`;
+                } else if (action === 'daemon') {
+                    // Start daemon using the native bridge
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                    if (isIOS) {
+                        if (window.webkit?.messageHandlers?.Kie) {
+                            window.webkit.messageHandlers.Kie.postMessage({ action: 'startDaemon', taskName: 'daemon', interval: 60 });
+                        }
+                    } else {
+                        if (window.Kie && typeof window.Kie.startDaemon === 'function') {
+                            window.Kie.startDaemon(JSON.stringify({ taskName: 'daemon', interval: 60 }));
+                        }
+                    }
+                    statusEl.innerText = "👻 Demonio nativo disparado desde JS a segundo plano.";
                 } else if (action === 'contacts') {
                     statusEl.innerText = `👥 ${data.contacts.length} contactos leídos.`;
                     const modal = document.getElementById('contacts-modal');

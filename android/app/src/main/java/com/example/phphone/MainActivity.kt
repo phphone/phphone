@@ -28,7 +28,9 @@ class MainActivity : Activity() {
 
     private lateinit var reloadReceiver: BroadcastReceiver
     private lateinit var webView: WebView
+    private lateinit var nativeWebView: WebView
     private var localWebServer: KieWebServer? = null
+    var uiRects: List<android.graphics.Rect> = emptyList()
 
     // Sincronización de hardware (CountDownLatch)
     var gpsLatch: java.util.concurrent.CountDownLatch? = null
@@ -129,7 +131,60 @@ class MainActivity : Activity() {
             android.util.Log.e("Phphone", "Error al iniciar KieWebServer: ${e.message}")
         }
 
+        nativeWebView = WebView(this).apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.allowFileAccess = true
+            settings.allowContentAccess = true
+            visibility = View.GONE
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    return false
+                }
+            }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+                    val dy = scrollY - oldScrollY
+                    val js = "window.dispatchEvent(new CustomEvent('nativeScroll', { detail: { dy: $dy } }));"
+                    this@MainActivity.runOnUiThread {
+                        this@MainActivity.webView.evaluateJavascript(js, null)
+                    }
+                }
+            }
+        }
+
         webView = WebView(this).apply {
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            addJavascriptInterface(KieBridge(this@MainActivity), "Kie")
+            
+            @SuppressLint("ClickableViewAccessibility")
+            setOnTouchListener { v, event ->
+                var isInsideUi = false
+                for (rect in this@MainActivity.uiRects) {
+                    if (rect.contains(event.x.toInt(), event.y.toInt())) {
+                        isInsideUi = true
+                        break
+                    }
+                }
+                
+                if (!isInsideUi && this@MainActivity.nativeWebView.visibility == View.VISIBLE) {
+                    val eventCopy = android.view.MotionEvent.obtain(event)
+                    val locationWebView = IntArray(2)
+                    v.getLocationOnScreen(locationWebView)
+                    val locationNative = IntArray(2)
+                    this@MainActivity.nativeWebView.getLocationOnScreen(locationNative)
+                    eventCopy.offsetLocation(
+                        (locationWebView[0] - locationNative[0]).toFloat(),
+                        (locationWebView[1] - locationNative[1]).toFloat()
+                    )
+                    this@MainActivity.nativeWebView.dispatchTouchEvent(eventCopy)
+                    eventCopy.recycle()
+                    true
+                } else {
+                    false
+                }
+            }
+            
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = true
@@ -282,10 +337,18 @@ class MainActivity : Activity() {
                     
                     return super.shouldInterceptRequest(view, request)
                 }
+
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    this@MainActivity.window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.BLACK))
+                }
             }
         }
 
-        setContentView(webView)
+        val layout = android.widget.FrameLayout(this)
+        layout.addView(nativeWebView, android.widget.FrameLayout.LayoutParams.MATCH_PARENT, android.widget.FrameLayout.LayoutParams.MATCH_PARENT)
+        layout.addView(webView, android.widget.FrameLayout.LayoutParams.MATCH_PARENT, android.widget.FrameLayout.LayoutParams.MATCH_PARENT)
+        setContentView(layout)
         
         // Registrar el BroadcastReceiver para el Hot Reloading
         reloadReceiver = object : BroadcastReceiver() {
@@ -964,4 +1027,77 @@ class MainActivity : Activity() {
     //     })
     // }
     */
+
+    inner class KieBridge(private val activity: MainActivity) {
+        @android.webkit.JavascriptInterface
+        fun startDaemon(params: String) {
+            try {
+                val json = org.json.JSONObject(params)
+                val taskName = json.optString("taskName", "daemon")
+                val interval = json.optInt("interval", 60)
+                val endpoint = json.optString("endpoint", "/daemon.php")
+                
+                val intent = Intent(activity, PhphoneDaemonService::class.java)
+                intent.putExtra("taskName", taskName)
+                intent.putExtra("interval", interval)
+                intent.putExtra("endpoint", endpoint)
+                
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    activity.startForegroundService(intent)
+                } else {
+                    activity.startService(intent)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("Phphone", "Error parseando startDaemon: ${e.message}")
+            }
+        }
+
+        @android.webkit.JavascriptInterface
+        fun loadUrl(url: String) {
+            activity.runOnUiThread {
+                activity.nativeWebView.loadUrl(url)
+            }
+        }
+
+        @android.webkit.JavascriptInterface
+        fun setBrowserActive(active: Boolean) {
+            activity.runOnUiThread {
+                activity.nativeWebView.visibility = if (active) View.VISIBLE else View.GONE
+                if (!active) {
+                    activity.nativeWebView.loadUrl("about:blank")
+                }
+            }
+        }
+
+        @android.webkit.JavascriptInterface
+        fun setBrowserMargins(topMargin: Int, bottomMargin: Int) {
+            activity.runOnUiThread {
+                val scale = activity.resources.displayMetrics.density
+                val params = activity.nativeWebView.layoutParams as android.widget.FrameLayout.LayoutParams
+                params.setMargins(0, (topMargin * scale).toInt(), 0, (bottomMargin * scale).toInt())
+                activity.nativeWebView.layoutParams = params
+            }
+        }
+
+        @android.webkit.JavascriptInterface
+        fun setUiRects(rectsJson: String) {
+            try {
+                val jsonArray = org.json.JSONArray(rectsJson)
+                val newRects = mutableListOf<android.graphics.Rect>()
+                val scale = activity.resources.displayMetrics.density
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+                    newRects.add(android.graphics.Rect(
+                        (obj.getDouble("left") * scale).toInt(),
+                        (obj.getDouble("top") * scale).toInt(),
+                        (obj.getDouble("right") * scale).toInt(),
+                        (obj.getDouble("bottom") * scale).toInt()
+                    ))
+                }
+                activity.uiRects = newRects
+            } catch (e: Exception) {
+                android.util.Log.e("Phphone", "Error parseando setUiRects: ${e.message}")
+            }
+        }
+    }
 }

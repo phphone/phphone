@@ -425,4 +425,18 @@ class Device {
 
         return json_decode($response, true) ?? ['success' => false, 'error' => 'Respuesta no válida del puente.'];
     }
+
+    /**
+     * Inicia un demonio en segundo plano de manera nativa (Foreground Service en Android / BGTask en iOS).
+     * @param string $taskName El nombre de la tarea (ej: 'sync', 'daemon') que luego buscará el archivo PHP asociado.
+     * @param int $interval Segundos recomendados entre ejecuciones (principalmente iOS).
+     */
+    public static function startDaemon(string $taskName, int $interval = 60): bool {
+        // La implementación en JS en index.php envía el comando 'daemon' usando 'triggerHardware' que es
+        // interceptado por Android/iOS y maneja el inicio del demonio.
+        // Pero si llamamos a `startDaemon` vía la API `action=daemon` de `index.php` 
+        // necesitamos devolver true o disparar el bridge nativamente si hubiese endpoint HTTP. 
+        // Al devolver true aquí, el JS responderá correctamente e intentará inicializarlo nativamente.
+        return true;
+    }
 }

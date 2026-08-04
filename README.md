@@ -23,6 +23,16 @@
 
 ---
 
+## 📖 Glossary
+
+- **Phphone:** The global framework or compiler that encompasses the project.
+- **Kie Engine:** The core engine written in C++ that contains the precompiled PHP binaries and the communication bridge. It is responsible for the existence of the `window.Kie` object in your JavaScript.
+- **Dual WebView:** Native Phphone architecture that overlays two browsers: a transparent front one for your HTML/PHP app, and a back one for loading external websites.
+- **KieBridge:** The direct communication channel between your JavaScript and the native operating system (Android/iOS).
+
+---
+
+<a id="why-phphone"></a>
 ## ⚡ The Problem with Modern Mobile Development
 
 Modern mobile development is broken. It has been hijacked by the absurd complexity of bloated environments, fragile dependencies (NPM hell), and heavy architectures that force you to learn new languages or compile massive Electron/React Native binaries just to show a simple interface.
@@ -60,7 +70,6 @@ By unlocking the infinite JavaScript and CSS ecosystem, Phphone makes the curren
 * **That sleek UI you already built in Vue or pure Web Components?** 
   Package it natively for iOS and Android without rewriting a single line of your visual code.
 
-<a id="why-phphone"></a>
 ### Why is it NOT "just a wrapped website"?
 Many developers assume that if you use a *WebView* for the graphical interface (HTML/CSS), your app is just a web browser disguised as an APK. **This is false in Phphone.**
 While a traditional wrapped app requires complex logic to happen in the cloud, **Phphone injects the backend into your pocket**. The WebView is purely the "monitor glass"; the real magic happens behind the scenes where a native **C/C++** engine runs a real **PHP 8.4** interpreter and a **SQLite** database, all executing directly on your phone's CPU cores with deep access to native hardware.
@@ -89,6 +98,99 @@ Our core philosophy is **Vanilla PHP / HTML / JS / CSS**. However, Phphone's fle
 - **Frontend Libraries & Web Components:** The native container runs a modern browser engine, so any visual framework (Vue, React, Tailwind, Bootstrap) will work flawlessly. We give a **special mention to Lit.js and native Web Components**, as they are the perfect match for Phphone's ultra-lightweight and "Vanilla" philosophy, allowing you to build complex interfaces without massive dependencies. You are completely free to use the architecture you are most comfortable with. *(Pro-Tip: If you want to use ultra-modern JS features and ensure compatibility with older Android devices, simply drop a JS Polyfill into your HTML, just like you would on a standard website).*
 - **Routing & Relative Paths (Technical Data):** Even though the local server runs at `http://127.0.0.1:8081`, **you don't need to hardcode this IP in your code**. Write standard HTML/PHP using traditional relative paths (`<a href="/newgradient.php">`). The native container resolves them automatically, ensuring your code is 100% portable and fail-proof if the port changes.
 - **Backend Libraries (Composer) & Heavy Frameworks:** You are free to use `composer` to pull in third-party packages. Thanks to the brutal efficiency of the C++ engine, **you can run full frameworks like Laravel or Symfony directly in the user's pocket**. Yes, Laravel embedded and processed locally on mobile, without external servers. This changes the rules of the game in the mobile ecosystem. **IMPORTANT:** You can only use dependencies written in **pure PHP**. If a package requires compiling C extensions on the host operating system, it **will not be compatible** with the embedded engine.
+
+---
+
+## 🔐 Security Best Practices (Must Read)
+
+> [!WARNING]  
+> **The Golden Rule of Mobile Security: Never Trust the Client**
+> 
+> Even though Phphone encrypts your source code (AES-256) to protect your Intellectual Property, **you must NEVER hardcode sensitive secrets** (like Database passwords, Stripe/AWS keys, or Master API Tokens) in your PHP code or `.env` files. 
+>
+> Mobile apps (built with Phphone, Flutter, Swift, etc.) can be decompiled by determined attackers, exposing any text strings inside.
+>
+> **Best Practice (Backend Proxy):** Your Phphone app should act only as a client. All sensitive operations (like charging a credit card or querying a private database) must be done by making HTTP requests to your own remote REST API, where your secrets are safely stored on a server you control. For local storage, standard SQLite saves data in plain text, so always encrypt sensitive user data before saving it using PHP's `openssl_encrypt`.
+
+---
+
+## 🌐 Background Native Browser (Dual WebView)
+
+Suppose you are building your app with Phphone and you need to open an external web page (like Google or a payment gateway) *inside* your application. If you use a traditional `iframe`, you will run into security blocks (CORS, X-Frame-Options) and sites that simply refuse to load.
+
+To solve this, Phphone includes a native browser hidden behind your HTML interface.
+
+**How to use it? Follow this example:**
+
+> 💡 **Note:** You do not need to install any SDK or import external libraries. The Phphone native engine automatically injects the `Kie` object (the communication bridge) invisibly into your JavaScript's global `window` object as soon as the app starts.
+
+**Step 1: Add this function to your JavaScript**
+Since Phphone is cross-platform, the way to talk to the native engine changes slightly between iOS and Android. Copy this *wrapper* into your code to unify it:
+
+```javascript
+function callNativeBrowser(action, params = {}) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+        if (window.webkit?.messageHandlers?.Kie) {
+            window.webkit.messageHandlers.Kie.postMessage({ action, ...params });
+        }
+    } else {
+        if (window.Kie && typeof window.Kie[action] === 'function') {
+            if (action === 'loadUrl') window.Kie.loadUrl(params.url);
+            if (action === 'setBrowserActive') window.Kie.setBrowserActive(params.active);
+            if (action === 'setBrowserMargins') window.Kie.setBrowserMargins(params.top, params.bottom);
+            if (action === 'setUiRects') window.Kie.setUiRects(params.rectsJson);
+            if (action === 'startDaemon') window.Kie.startDaemon(JSON.stringify(params));
+        }
+    }
+}
+```
+
+**Step 2: Open the page and adjust your interface**
+When the user presses a button in your app, turn on the browser, give it a URL, and make sure the background of your HTML is transparent so you can see it:
+
+```javascript
+// 1. Turn on the background browser
+callNativeBrowser('setBrowserActive', { active: true });
+
+// 2. Load the page you want
+callNativeBrowser('loadUrl', { url: 'https://google.com' });
+
+// 3. Make your App background transparent (from CSS)
+document.body.style.backgroundColor = 'transparent';
+```
+
+**Step 3 (Optional): Protect your menus**
+If your app has a top navigation bar (Header) of `60px`, you won't want the native browser to draw underneath it. You can "push" it using margins:
+
+```javascript
+// Leave 60px free at the top and 0px at the bottom
+callNativeBrowser('setBrowserMargins', { top: 60, bottom: 0 });
+```
+
+**Step 4 (Optional): Allow User Interaction (Touch & Scroll)**
+Since your web application is now a transparent "glass" in front of the native browser, touches will be blocked. To pass touches through to the native browser, tell Phphone exactly in which rectangles your menus are located. Everything outside of them will be clickable in the background browser.
+
+```javascript
+// Pass an array with the coordinates of your UI elements
+callNativeBrowser('setUiRects', { 
+    rectsJson: JSON.stringify([
+        { left: 0, top: 0, right: window.innerWidth, bottom: 60 }
+    ]) 
+});
+```
+
+Additionally, the native browser will notify you every time the user scrolls by emitting a `nativeScroll` event. You can listen to it to hide/show your menus dynamically:
+
+```javascript
+window.addEventListener('nativeScroll', (e) => {
+    const dy = e.detail.dy; // Positive if scrolling down, Negative if scrolling up
+    if (dy > 10) console.log("Hide Header");
+});
+```
+
+> [!WARNING]
+> When you are NOT using this background browser, make sure to turn it off (`active: false`) and keep your `<body>` tag's background a solid color (e.g. `background-color: white;`).
 
 ---
 
@@ -284,6 +386,59 @@ Device::secureWrite("api_token", "super_secret_token_123");
 - 📤 Native Share Sheet (Share content to WhatsApp, Social Media, etc).
 - 🔋 Battery Status, Network State, and Clipboard.
 - 🔦 Flashlight and Haptics (Vibration).
+- 👻 **Background Tasks (Daemons):** Run PHP scripts silently in the background (Android Foreground Services & iOS BGTaskScheduler).
+
+### 👻 Background Tasks (Daemons)
+Background tasks in mobile development are notoriously complex, but Phphone simplifies this by leveraging a hybrid architecture. Here is how the flow works:
+
+1. **The Trigger (JS ➔ Native):** Your JavaScript frontend tells the native OS to start the task.
+2. **The Loop (Native ➔ PHP):** The OS spawns an unkillable background thread (Android `ForegroundService` or iOS `BGTaskScheduler`) which makes invisible, periodic HTTP requests to your local PHP server.
+3. **The Execution (PHP):** Your PHP script wakes up, executes the background logic, and goes back to sleep.
+
+#### Setup A: Vanilla PHP (Default)
+If you are building a standard Phphone app without complex routing, the native engine will ping `daemon.php` in your root directory by default.
+
+**1. Start from JS:**
+```javascript
+callNativeBrowser('startDaemon', { taskName: 'sync_data', interval: 60 });
+```
+
+**2. Handle in PHP (`src/daemon.php`):**
+```php
+<?php
+$task = $_GET['task'] ?? 'unknown';
+// Your logic here (e.g. Sync SQLite, send push notification)
+```
+
+#### Setup B: Advanced Frameworks (Laravel, Symfony, etc.)
+If you are running a full MVC framework inside Phphone, leaving a `daemon.php` file in the root breaks your routing architecture. Instead, you can pass a custom `endpoint` so the native OS pings your framework's router (e.g., `public/index.php`).
+
+> ⚠️ **Framework Caveat:** Heavy frameworks like Laravel will work on Phphone, but because the Android APK filesystem is **Read-Only**, you MUST override their default storage paths (e.g., `storage/` or `var/cache/`) to point to the writable OS `data` directory, otherwise they will crash with a fatal error.
+> 
+> **Laravel Fix Example (`bootstrap/app.php`):**
+> ```php
+> $app = new Illuminate\Foundation\Application($_ENV['APP_BASE_PATH'] ?? dirname(__DIR__));
+> // Redirect storage to the writable OS temp directory
+> $app->useStoragePath(sys_get_temp_dir() . '/laravel_storage');
+> ```
+
+**1. Start from JS (Custom Endpoint):**
+```javascript
+callNativeBrowser('startDaemon', { 
+    taskName: 'sync_data', 
+    interval: 60,
+    endpoint: '/api/background-tasks' // The native OS will ping this Laravel route!
+});
+```
+
+**2. Handle in Laravel (`routes/api.php`):**
+```php
+Route::get('/background-tasks', function(Request $request) {
+    if ($request->task === 'sync_data') {
+        // Execute Eloquent models, queues, etc.
+    }
+});
+```
 
 ### ⚠️ Embedded Engine Peculiarities (Avoiding Zend Bailout)
 Since Phphone runs the PHP C++ core in a persistent shared-memory state (via NanoHTTPD/GCDWebServer) rather than tearing it down per-request like Apache, **fatal errors behave differently**. 
@@ -348,7 +503,7 @@ Phphone is a massive project built independently (Open-Core with MIT License).
 Currently, **I urgently need your support to get a Mac computer**. The entire iOS bridge (Swift) has been designed almost "blindly", and in order to guarantee updates, compile, test in Xcode, and keep Phphone alive in the Apple ecosystem, **the community's help is vital**.
 
 If you believe in the vision of reviving PHP for the mobile era and want this tool to keep growing:
-👉 **[Support me on GitHub Sponsors / Patreon] (LINK WILL GO HERE)**
+👉 **[Support me on GitHub Sponsors](https://github.com/sponsors/stevenrojas888)**
 
 Your contribution (no matter how small) will help me keep this engine free, lightweight, and brutally efficient for all of us.
 

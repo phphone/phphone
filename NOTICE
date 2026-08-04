@@ -1,0 +1,34 @@
+Phphone Compiler
+Copyright 2026 Steven Rojas (o el nombre de tu empresa/entidad)
+
+This product includes software developed by Phphone Compiler Project.
+
+========================================================================
+Third-Party Software Notices and Attributions
+========================================================================
+
+This project incorporates components from the following third-party software:
+
+1. PHP (PHP License)
+   Copyright (c) The PHP Group
+   Website: https://www.php.net
+
+2. OpenSSL (Apache License 2.0 / OpenSSL License)
+   Copyright (c) 1998-2026 The OpenSSL Project
+   Website: https://www.openssl.org
+
+3. cURL (curl License / MIT derivative)
+   Copyright (c) 1996-2026 Daniel Stenberg, <daniel@haxx.se>, and many contributors.
+   Website: https://curl.se
+
+4. NanoHTTPD (Modified BSD License)
+   Copyright (c) 2012-2013 by Paul S. Hawke, 2001,2005-2013 by Jarno Elonen, 2010 by Konstantinos Togias
+   Website: https://github.com/NanoHttpd/nanohttpd
+
+5. Firebase (Apache License 2.0)
+   Copyright 2026 Google LLC
+   Website: https://firebase.google.com/
+
+6. Google Play Billing Library (Apache License 2.0)
+   Copyright 2026 Google LLC
+   Website: https://developer.android.com/google/play/billing

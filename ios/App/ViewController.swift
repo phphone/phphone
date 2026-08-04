@@ -2,6 +2,7 @@ import UIKit
 import WebKit
 import CoreLocation
 import UserNotifications
+import BackgroundTasks
 #if canImport(Darwin)
 import Darwin
 #endif
@@ -29,11 +30,34 @@ import StoreKit
 // Añade los delegados SKPaymentTransactionObserver, SKProductsRequestDelegate a la clase si activas IAP:
 // class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 */
-class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate {
+class PassthroughWebView: WKWebView {
+    var uiRects: [CGRect] = []
+    
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard !isHidden && alpha > 0 else { return nil }
+        
+        var insideUI = false
+        for rect in uiRects {
+            if rect.contains(point) {
+                insideUI = true
+                break
+            }
+        }
+        
+        if !insideUI {
+            return nil
+        }
+        
+        return super.hitTest(point, with: event)
+    }
+}
+
+class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, WKScriptMessageHandler, UIScrollViewDelegate {
 
     static var KIE_ZOOM_ENABLED = false // CONFIG_ZOOM
 
-    var webView: WKWebView!
+    var webView: PassthroughWebView!
+    var nativeWebView: WKWebView!
     var webServer: GCDWebServer!
     var audioPlayer: AVAudioPlayer?
     
@@ -98,9 +122,25 @@ class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerD
             webConfiguration.userContentController.addUserScript(styleScript)
         }
 
-        webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        webConfiguration.userContentController.add(self, name: "Kie")
+
+        nativeWebView = WKWebView(frame: .zero)
+        nativeWebView.isHidden = true
+        nativeWebView.scrollView.delegate = self
+        nativeWebView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(nativeWebView)
+        NSLayoutConstraint.activate([
+            nativeWebView.topAnchor.constraint(equalTo: view.topAnchor),
+            nativeWebView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            nativeWebView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            nativeWebView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+
+        webView = PassthroughWebView(frame: .zero, configuration: webConfiguration)
         webView.navigationDelegate = self
         webView.uiDelegate = self
+        webView.isOpaque = false
+        webView.backgroundColor = UIColor.clear
         
         if !ViewController.KIE_ZOOM_ENABLED {
             webView.scrollView.bounces = false
@@ -116,6 +156,72 @@ class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerD
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+    }
+    
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if message.name == "Kie", let dict = message.body as? [String: Any], let action = dict["action"] as? String {
+            DispatchQueue.main.async {
+                switch action {
+                case "loadUrl":
+                    if let urlStr = dict["url"] as? String, let url = URL(string: urlStr) {
+                        self.nativeWebView.load(URLRequest(url: url))
+                    }
+                case "startDaemon":
+                    let endpoint = dict["endpoint"] as? String ?? "/daemon.php"
+                    let taskName = dict["taskName"] as? String ?? "daemon"
+                    UserDefaults.standard.set(endpoint, forKey: "daemon_endpoint")
+                    UserDefaults.standard.set(taskName, forKey: "daemon_task")
+                    
+                    if #available(iOS 13.0, *) {
+                        let request = BGAppRefreshTaskRequest(identifier: "com.phphone.daemon")
+                        request.earliestBeginDate = Date(timeIntervalSinceNow: 60)
+                        do {
+                            try BGTaskScheduler.shared.submit(request)
+                            print("✅ Demonio de iOS programado para: \(endpoint)?task=\(taskName)")
+                        } catch {
+                            print("❌ Error programando el demonio en iOS: \(error.localizedDescription)")
+                        }
+                    }
+                case "setBrowserActive":
+                    if let active = dict["active"] as? Bool {
+                        self.nativeWebView.isHidden = !active
+                        if !active {
+                            self.nativeWebView.load(URLRequest(url: URL(string: "about:blank")!))
+                        }
+                    }
+                case "setBrowserMargins":
+                    if let top = dict["topMargin"] as? CGFloat, let bottom = dict["bottomMargin"] as? CGFloat {
+                        self.nativeWebView.removeFromSuperview()
+                        self.view.insertSubview(self.nativeWebView, belowSubview: self.webView)
+                        self.nativeWebView.translatesAutoresizingMaskIntoConstraints = false
+                        NSLayoutConstraint.activate([
+                            self.nativeWebView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: top),
+                            self.nativeWebView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -bottom),
+                            self.nativeWebView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+                            self.nativeWebView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+                        ])
+                    }
+                case "setUiRects":
+                    if let rectsStr = dict["rectsJson"] as? String, let data = rectsStr.data(using: .utf8) {
+                        do {
+                            if let arr = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] {
+                                var newRects: [CGRect] = []
+                                for r in arr {
+                                    if let l = r["left"] as? Double, let t = r["top"] as? Double, let rt = r["right"] as? Double, let b = r["bottom"] as? Double {
+                                        newRects.append(CGRect(x: l, y: t, width: rt - l, height: b - t))
+                                    }
+                                }
+                                self.webView.uiRects = newRects
+                            }
+                        } catch {}
+                    }
+                case "gps_start":
+                    break
+                default:
+                    break
+                }
+            }
+        }
     }
 
     override func viewDidLoad() {
@@ -888,6 +994,16 @@ class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerD
         }
     }
     
+    private var lastScrollY: CGFloat = 0
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView == nativeWebView.scrollView {
+            let dy = scrollView.contentOffset.y - lastScrollY
+            lastScrollY = scrollView.contentOffset.y
+            let js = "window.dispatchEvent(new CustomEvent('nativeScroll', { detail: { dy: \(dy) } }));"
+            webView.evaluateJavaScript(js, completionHandler: nil)
+        }
+    }
+
     // --- 🌐 WKNavigationDelegate: Interceptar Enlaces Externos ---
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         guard let url = navigationAction.request.url else {

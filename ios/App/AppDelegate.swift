@@ -1,5 +1,6 @@
 import UIKit
 import WebKit
+import BackgroundTasks
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -9,10 +10,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // PHPHONE_INJECT:AUDIO_SESSION
+        
+        if #available(iOS 13.0, *) {
+            BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.phphone.daemon", using: nil) { task in
+                self.handleDaemonTask(task: task as! BGAppRefreshTask)
+            }
+        }
+        
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = ViewController()
         window?.makeKeyAndVisible()
         return true
+    }
+    
+    @available(iOS 13.0, *)
+    func handleDaemonTask(task: BGAppRefreshTask) {
+        task.expirationHandler = {
+            // Cancelar tareas si el tiempo se agota
+        }
+        
+        // Simular un request local al motor PHP
+        let endpoint = UserDefaults.standard.string(forKey: "daemon_endpoint") ?? "/daemon.php"
+        let taskName = UserDefaults.standard.string(forKey: "daemon_task") ?? "daemon"
+        let url = URL(string: "http://127.0.0.1:8081\(endpoint)?task=\(taskName)")!
+        let taskReq = URLSession.shared.dataTask(with: url) { data, response, error in
+            task.setTaskCompleted(success: error == nil)
+        }
+        taskReq.resume()
     }
 
     // Interceptar la URL scheme "phphone://reload" disparada por el CLI

@@ -1,6 +1,5 @@
 <?php
 namespace Phphone;
-require_once dirname(__DIR__) . '/_phphone_wrapper.php';
 
 /**
  * Phphone Device API
@@ -131,13 +130,43 @@ class Device {
     }
 
     /**
-     * Obtiene la agenda de contactos del dispositivo nativo.
-     * Pide permisos dinámicamente si no los tiene.
-     * @return array|false Retorna un array de contactos o false si se denegó el permiso
+     * Obtiene los contactos de la libreta de direcciones del dispositivo.
+     * @return array|false Retorna un array de contactos o false si falla.
      */
     public static function getContacts() {
         $context = stream_context_create(['http' => ['timeout' => 60]]);
         $response = @file_get_contents(self::BRIDGE_URL . '/api/contacts', false, $context);
+        if ($response === false) return false;
+        
+        $data = json_decode($response, true);
+        if (isset($data['error'])) return false;
+        return $data;
+    }
+
+    /**
+     * Obtiene el token de registro de Firebase Cloud Messaging (FCM) para Notificaciones Push.
+     * Requiere que el framework tenga activado Firebase en los binarios nativos (descomentado).
+     * @return string|false Retorna el token FCM o false si Firebase no está activado.
+     */
+    public static function getPushToken() {
+        $context = stream_context_create(['http' => ['timeout' => 5]]);
+        $response = @file_get_contents(self::BRIDGE_URL . '/api/push_token', false, $context);
+        if ($response === false) return false;
+        
+        $data = json_decode($response, true);
+        if (isset($data['error']) || !isset($data['token'])) return false;
+        return $data['token'];
+    }
+
+    /**
+     * Inicia el flujo de compra integrada (In-App Purchase) para un producto específico.
+     * Requiere que el framework tenga activadas las dependencias de facturación (StoreKit/Google Play Billing).
+     * @param string $productId El ID del producto configurado en la tienda.
+     * @return array|false Retorna el recibo de compra o false si falla/no está activado.
+     */
+    public static function purchaseProduct($productId) {
+        $context = stream_context_create(['http' => ['timeout' => 120]]);
+        $response = @file_get_contents(self::BRIDGE_URL . '/api/iap/purchase?productId=' . urlencode($productId), false, $context);
         if ($response === false) return false;
         
         $data = json_decode($response, true);
@@ -395,5 +424,19 @@ class Device {
         }
 
         return json_decode($response, true) ?? ['success' => false, 'error' => 'Respuesta no válida del puente.'];
+    }
+
+    /**
+     * Inicia un demonio en segundo plano de manera nativa (Foreground Service en Android / BGTask en iOS).
+     * @param string $taskName El nombre de la tarea (ej: 'sync', 'daemon') que luego buscará el archivo PHP asociado.
+     * @param int $interval Segundos recomendados entre ejecuciones (principalmente iOS).
+     */
+    public static function startDaemon(string $taskName, int $interval = 60): bool {
+        // La implementación en JS en index.php envía el comando 'daemon' usando 'triggerHardware' que es
+        // interceptado por Android/iOS y maneja el inicio del demonio.
+        // Pero si llamamos a `startDaemon` vía la API `action=daemon` de `index.php` 
+        // necesitamos devolver true o disparar el bridge nativamente si hubiese endpoint HTTP. 
+        // Al devolver true aquí, el JS responderá correctamente e intentará inicializarlo nativamente.
+        return true;
     }
 }

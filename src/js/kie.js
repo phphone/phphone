@@ -1,43 +1,7 @@
 // public/js/kie.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // INTERCEPTOR UNIVERSAL DE ENLACES
-    document.body.addEventListener('click', async (e) => {
-        const link = e.target.closest('a');
-        
-        // Omitir si no es un enlace o si es un enlace externo
-        if (!link || link.getAttribute('href').startsWith('http') || link.getAttribute('href').startsWith('//')) {
-            return;
-        }
-        
-        const urlDestino = link.getAttribute('href');
-        const mainContent = document.getElementById('main-content');
-        
-        // Si no hay contenedor main-content, dejar que el navegador cambie de página nativamente
-        if (!mainContent) {
-            return;
-        }
-
-        e.preventDefault();
-
-        try {
-            const response = await fetch(urlDestino, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            
-            if (!response.ok) throw new Error(`Error Phphone: ${response.status}`);
-            
-            const htmlRecibido = await response.text();
-            
-            // Inyectar el fragmento dentro del contenedor
-            mainContent.innerHTML = htmlRecibido;
-            
-            // Actualizar el historial de navegación sin recargar
-            window.history.pushState({}, '', urlDestino);
-        } catch (error) {
-            console.error('Phphone Routing Error:', error);
-        }
-    });
+    console.log("Phphone Framework inicializado");
 });
 
 // Phphone Framework Namespace

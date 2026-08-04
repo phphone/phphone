@@ -54,5 +54,14 @@
     <string>Esta aplicación requiere Face ID para autenticar tu identidad de forma segura.</string>
     <key>NSContactsUsageDescription</key>
     <string>Esta aplicación requiere acceso a tus contactos para mostrar tu agenda.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>processing</string>
+    </array>
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
+    <array>
+        <string>com.phphone.daemon</string>
+    </array>
 </dict>
 </plist>

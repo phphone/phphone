@@ -23,6 +23,16 @@
 
 ---
 
+## 📖 Glosario
+
+- **Phphone:** El framework o compilador global que engloba el proyecto.
+- **Motor Kie (Kie Engine):** El motor core escrito en C++ que contiene los binarios precompilados de PHP y el puente (*bridge*) de comunicación. Es el responsable de que exista el objeto `window.Kie` en tu JavaScript.
+- **Dual WebView:** Arquitectura nativa de Phphone que superpone dos navegadores: uno frontal transparente para tu app HTML/PHP, y uno trasero para cargar sitios web externos.
+- **KieBridge:** El canal de comunicación directo entre tu JavaScript y el sistema operativo nativo (Android/iOS).
+
+---
+
+<a id="why-phphone"></a>
 ## ⚡ El Problema del Desarrollo Móvil Actual
 
 El desarrollo móvil moderno está roto. Ha sido secuestrado por la complejidad absurda de entornos sobredimensionados, dependencias frágiles (NPM hell) y arquitecturas pesadas que te obligan a aprender lenguajes nuevos o compilar binarios masivos de Electron/React Native solo para mostrar una simple interfaz.
@@ -60,7 +70,6 @@ Al abrirte las puertas del ecosistema infinito de JavaScript y CSS, Phphone hace
 * **¿Esa interfaz fluida que ya tienes lista en Vue o Web Components puros?** 
   Empaquétala nativamente sin reescribir ni una sola coma de tu código visual.
 
-<a id="why-phphone"></a>
 ### ¿Por qué NO es "solo una web encapsulada"?
 Muchos desarrolladores asumen que si usas un *WebView* para la interfaz gráfica (HTML/CSS), tu app es solo un navegador web disfrazado de APK. **Esto es falso en Phphone.**
 Mientras que una app encapsulada tradicional requiere que la lógica compleja suceda en la nube, **Phphone inyecta el backend en tu bolsillo**. El WebView es puramente el "cristal del monitor"; la verdadera magia ocurre detrás de escena donde un motor nativo en **C/C++** corre un intérprete real de **PHP 8.4** y una base de datos **SQLite**, todo ejecutándose directamente en los núcleos del procesador de tu teléfono con acceso profundo al hardware nativo.
@@ -89,6 +98,99 @@ Nuestra filosofía principal es **Vanilla PHP / HTML / JS / CSS**. Sin embargo, 
 - **Librerías Frontend y Web Components:** El contenedor nativo carga un motor de navegador moderno, por lo que cualquier framework visual (Vue, React, Tailwind, Bootstrap) funcionará perfectamente. Hacemos una **mención especial a Lit.js y los Web Components** nativos, ya que son la pareja perfecta para la filosofía "Vanilla" y ultraligera de Phphone, permitiéndote crear interfaces complejas sin dependencias masivas. Eres libre de usar la arquitectura con la que te sientas más cómodo. *(Pro-Tip: Si quieres usar funciones ultra-modernas de JS y asegurar soporte en teléfonos Android antiguos, simplemente inyecta un Polyfill en tu HTML, exactamente igual a como lo harías en un sitio web tradicional).*
 - **Enrutado y Rutas Relativas (Dato Técnico):** Aunque el servidor corre en `http://127.0.0.1:8081`, **no necesitas hardcodear esta IP en tu código**. Escribe HTML/PHP usando rutas relativas tradicionales (`<a href="/newgradient.php">`). El contenedor nativo las resuelve automáticamente, asegurando que tu código sea 100% portable y a prueba de fallos si el puerto cambia.
 - **Librerías Backend (Composer) y Frameworks Pesados:** Eres libre de usar `composer` para importar paquetes de terceros. Gracias a la brutal eficiencia del motor C++, **puedes correr frameworks completos como Laravel o Symfony directamente en el celular del usuario**. Sí, Laravel embebido y procesado localmente, sin servidores externos. Esto cambia las reglas del juego en el ecosistema móvil. **IMPORTANTE:** Solo puedes usar paquetes que estén escritos en **PHP puro**. Si una dependencia requiere compilar extensiones de C en el sistema operativo, **no será compatible** con el motor integrado.
+
+---
+
+## 🔐 Mejores Prácticas de Seguridad (Lectura Obligatoria)
+
+> [!WARNING]  
+> **La Regla de Oro de la Seguridad Móvil: Nunca confíes en el Cliente**
+> 
+> Aunque Phphone encripta tu código fuente (AES-256) para proteger tu Propiedad Intelectual, **NUNCA debes hardcodear secretos sensibles** (como contraseñas de Base de Datos, llaves de Stripe/AWS, o Tokens Maestros) en tu código PHP ni en archivos `.env`. 
+>
+> Las aplicaciones móviles (hechas con Phphone, Flutter, Swift, etc.) pueden ser descompiladas por atacantes expertos, exponiendo cualquier texto en su interior.
+>
+> **La Mejor Práctica (Backend Proxy):** Tu app en Phphone debe actuar solo como un cliente. Todas las operaciones sensibles (como cobrar una tarjeta o consultar una base de datos privada) deben hacerse mediante peticiones HTTP a tu propia API REST remota, donde tus secretos están seguros en un servidor que controlas. Para el almacenamiento local, SQLite guarda los datos en texto plano, así que siempre encripta la información sensible del usuario desde PHP con `openssl_encrypt` antes de guardarla.
+
+---
+
+## 🌐 Navegador Nativo en Segundo Plano (Dual WebView)
+
+Supongamos que estás construyendo tu app con Phphone y necesitas abrir una página web externa (como Google o una pasarela de pagos) *dentro* de tu aplicación. Si usas un `iframe` tradicional, te vas a topar con bloqueos de seguridad (CORS, X-Frame-Options) y sitios que simplemente se niegan a cargar.
+
+Para solucionar esto, Phphone incluye un navegador nativo oculto detrás de tu interfaz HTML. 
+
+**¿Cómo usarlo? Sigue este ejemplo:**
+
+> 💡 **Nota:** No necesitas instalar ningún SDK ni importar librerías externas. El motor nativo de Phphone inyecta automáticamente el objeto `Kie` (el puente de comunicación) de forma invisible dentro del objeto global `window` de tu JavaScript en cuanto la app arranca.
+
+**Paso 1: Agrega esta función a tu JavaScript**
+Como Phphone es multiplataforma, la forma de hablarle al motor nativo cambia un poco entre iOS y Android. Copia este *wrapper* en tu código para unificarlo:
+
+```javascript
+function callNativeBrowser(action, params = {}) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+        if (window.webkit?.messageHandlers?.Kie) {
+            window.webkit.messageHandlers.Kie.postMessage({ action, ...params });
+        }
+    } else {
+        if (window.Kie && typeof window.Kie[action] === 'function') {
+            if (action === 'loadUrl') window.Kie.loadUrl(params.url);
+            if (action === 'setBrowserActive') window.Kie.setBrowserActive(params.active);
+            if (action === 'setBrowserMargins') window.Kie.setBrowserMargins(params.top, params.bottom);
+            if (action === 'setUiRects') window.Kie.setUiRects(params.rectsJson);
+            if (action === 'startDaemon') window.Kie.startDaemon(JSON.stringify(params));
+        }
+    }
+}
+```
+
+**Paso 2: Abre la página y ajusta tu interfaz**
+Cuando el usuario presione un botón en tu app, enciende el navegador, dale una URL y asegúrate de que el fondo de tu HTML sea transparente para que puedas verlo:
+
+```javascript
+// 1. Enciende el navegador de fondo
+callNativeBrowser('setBrowserActive', { active: true });
+
+// 2. Carga la página que quieras
+callNativeBrowser('loadUrl', { url: 'https://google.com' });
+
+// 3. Vuelve el fondo de tu App transparente (desde CSS)
+document.body.style.backgroundColor = 'transparent';
+```
+
+**Paso 3 (Opcional): Protege tus menús**
+Si tu app tiene una barra de navegación superior (Header) de `60px`, no querrás que el navegador nativo se dibuje por debajo de ella. Puedes "empujarlo" usando los márgenes:
+
+```javascript
+// Deja 60px libres arriba y 0px abajo
+callNativeBrowser('setBrowserMargins', { top: 60, bottom: 0 });
+```
+
+**Paso 4 (Opcional): Permite que el usuario interactúe (Touch y Scroll)**
+Como tu aplicación web ahora es un "cristal" transparente frente al navegador nativo, los toques se bloquearán. Para dejar pasar los toques al navegador nativo, dile a Phphone en qué rectángulos exactos están tus menús. Todo lo que esté fuera de ellos será clickeable en el navegador de fondo.
+
+```javascript
+// Pasa un array con las coordenadas de tus elementos UI
+callNativeBrowser('setUiRects', { 
+    rectsJson: JSON.stringify([
+        { left: 0, top: 0, right: window.innerWidth, bottom: 60 }
+    ]) 
+});
+```
+
+Además, el navegador nativo te avisará cada vez que el usuario haga scroll, emitiendo un evento `nativeScroll`. Puedes escucharlo para ocultar/mostrar tus menús dinámicamente:
+
+```javascript
+window.addEventListener('nativeScroll', (e) => {
+    const dy = e.detail.dy; // Positivo si baja, Negativo si sube
+    if (dy > 10) console.log("Ocultar Header");
+});
+```
+
+> [!WARNING]
+> Cuando NO estés usando este navegador de fondo, asegúrate de apagarlo (`active: false`) y mantener el fondo de tu etiqueta `<body>` con un color sólido (ej. `background-color: white;`).
 
 ---
 
@@ -284,6 +386,59 @@ Device::secureWrite("api_token", "super_secret_token_123");
 - 📤 Share Nativo (Compartir contenido a WhatsApp, Redes Sociales, etc).
 - 🔋 Estado de Batería, Red, y Portapapeles.
 - 🔦 Linterna y Vibración (Haptics).
+- 👻 **Tareas en Segundo Plano (Demonios):** Ejecución silenciosa de scripts PHP de fondo (Foreground Services en Android & BGTaskScheduler en iOS).
+
+### 👻 Tareas en Segundo Plano (Demonios)
+Las tareas en segundo plano en el desarrollo móvil suelen ser muy complejas, pero Phphone lo simplifica usando una arquitectura híbrida. Así funciona el flujo:
+
+1. **El Gatillo (JS ➔ Nativo):** Tu frontend en JavaScript le da la orden al sistema operativo (Android/iOS) de iniciar la tarea.
+2. **El Bucle (Nativo ➔ PHP):** El sistema operativo crea un hilo de fondo persistente (`ForegroundService` en Android o `BGTaskScheduler` en iOS) que hace peticiones HTTP invisibles hacia tu servidor PHP local cada X segundos.
+3. **La Ejecución (PHP):** Tu script PHP despierta, ejecuta la lógica de fondo, y vuelve a dormirse.
+
+#### Escenario A: PHP Vanilla (Por defecto)
+Si estás construyendo una app estándar de Phphone sin enrutamiento complejo, el motor nativo buscará un archivo `daemon.php` en tu directorio raíz por defecto.
+
+**1. Iniciar desde JS:**
+```javascript
+callNativeBrowser('startDaemon', { taskName: 'sync_data', interval: 60 });
+```
+
+**2. Manejarlo en PHP (`src/daemon.php`):**
+```php
+<?php
+$task = $_GET['task'] ?? 'unknown';
+// Tu lógica de negocio aquí (ej: Sincronizar SQLite a un servidor externo, push)
+```
+
+#### Escenario B: Frameworks Avanzados (Laravel, Symfony, etc.)
+Si estás corriendo un framework MVC completo dentro de Phphone, dejar un archivo `daemon.php` en la raíz rompe tu arquitectura de rutas. En su lugar, puedes pasar un `endpoint` personalizado para que el sistema operativo nativo llame directamente al enrutador de tu framework (ej. `public/index.php`).
+
+> ⚠️ **Advertencia sobre Frameworks:** Frameworks pesados como Laravel funcionarán en Phphone, pero debido a que el sistema de archivos de un APK de Android es de **Solo-Lectura**, DEBES modificar las rutas de almacenamiento (ej. `storage/` o `var/cache/`) para que apunten al directorio `data` escribible del sistema operativo, de lo contrario colapsarán con un error fatal.
+> 
+> **Ejemplo de Solución para Laravel (`bootstrap/app.php`):**
+> ```php
+> $app = new Illuminate\Foundation\Application($_ENV['APP_BASE_PATH'] ?? dirname(__DIR__));
+> // Redirigir el almacenamiento a la partición escribible del OS
+> $app->useStoragePath(sys_get_temp_dir() . '/laravel_storage');
+> ```
+
+**1. Iniciar desde JS (Endpoint Personalizado):**
+```javascript
+callNativeBrowser('startDaemon', { 
+    taskName: 'sync_data', 
+    interval: 60,
+    endpoint: '/api/background-tasks' // ¡El SO nativo hará ping a esta ruta de Laravel!
+});
+```
+
+**2. Manejarlo en Laravel (`routes/api.php`):**
+```php
+Route::get('/background-tasks', function(Request $request) {
+    if ($request->task === 'sync_data') {
+        // Ejecutar modelos de Eloquent, colas, etc.
+    }
+});
+```
 
 ### ⚠️ Peculiaridades del Motor Embebido (Evitando el Zend Bailout)
 Dado que Phphone mantiene el núcleo de PHP (C++) vivo en un estado de memoria compartida persistente (vía NanoHTTPD/GCDWebServer) en lugar de destruirlo en cada petición como hace Apache, **los errores fatales se comportan diferente**.
@@ -348,7 +503,7 @@ Phphone es un proyecto titánico construido de forma independiente (Open-Core co
 Actualmente, **necesito tu apoyo urgente para conseguir un equipo Mac**. Todo el puente de iOS (Swift) ha sido diseñado casi "a ciegas", y para poder garantizar actualizaciones, compilar, testear en Xcode y mantener Phphone vivo en el ecosistema de Apple, **la comunidad es vital**.
 
 Si crees en la visión de revivir PHP para la era móvil y quieres que esta herramienta siga creciendo:
-👉 **[Apóyame en GitHub Sponsors / Patreon] (AQUÍ IRÁ TU ENLACE)**
+👉 **[Apóyame en GitHub Sponsors](https://github.com/sponsors/stevenrojas888)**
 
 Tu aporte (por más pequeño que sea) me ayudará a mantener este motor gratuito, ligero y brutalmente eficiente para todos nosotros.
 
