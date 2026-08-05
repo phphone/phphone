@@ -147,7 +147,6 @@ class KieWebServer(private val context: Context, port: Int) : NanoHTTPD("127.0.0
                     val resultJson = activity.galleryResult ?: "{\"error\":\"Unknown Gallery error\"}"
                     response = newFixedLengthResponse(Response.Status.OK, "application/json", resultJson)
                 }
-                /*
                 // --- PUSH NOTIFICATIONS (PHPHONE) ---
                 "/api/push_token" -> {
                     val activity = context as MainActivity
@@ -157,7 +156,6 @@ class KieWebServer(private val context: Context, port: Int) : NanoHTTPD("127.0.0
                     val resultJson = activity.pushTokenResult ?: "{\"error\":\"Unknown Push Token error\"}"
                     response = newFixedLengthResponse(Response.Status.OK, "application/json", resultJson)
                 }
-                */
                 /*
                 // --- IN APP PURCHASES (PHPHONE) ---
                 "/api/iap/purchase" -> {

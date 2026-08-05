@@ -65,8 +65,8 @@ class MainActivity : Activity() {
     var isGyroRunning = false
     
     // --- PUSH NOTIFICATIONS (PHPHONE) ---
-    // var pushTokenLatch: java.util.concurrent.CountDownLatch? = null
-    // var pushTokenResult: String? = null
+    var pushTokenLatch: java.util.concurrent.CountDownLatch? = null
+    var pushTokenResult: String? = null
 
     // --- IN APP PURCHASES (PHPHONE) ---
     // var billingClient: com.android.billingclient.api.BillingClient? = null
@@ -959,9 +959,7 @@ class MainActivity : Activity() {
         }.start()
     }
     
-    /*
     // --- PUSH NOTIFICATIONS (PHPHONE) ---
-    // Para activar Firebase, descomenta el siguiente método
     fun fetchPushToken() {
         try {
             com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -979,7 +977,6 @@ class MainActivity : Activity() {
             pushTokenLatch?.countDown()
         }
     }
-    */
 
     /*
     // --- IN APP PURCHASES (PHPHONE) ---
