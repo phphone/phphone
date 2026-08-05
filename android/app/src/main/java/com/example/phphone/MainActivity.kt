@@ -355,7 +355,7 @@ class MainActivity : Activity() {
             private var isReloading = false
             
             override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == "com.example.phphone.RELOAD") {
+                if (intent?.action == "${packageName}.RELOAD" || intent?.action == "com.example.phphone.RELOAD") {
                     if (isReloading) {
                         android.util.Log.w("Phphone", "⏳ Ignorando Hot Reload: Ya hay una recarga en curso (Previniendo Bailout)")
                         return
@@ -377,7 +377,9 @@ class MainActivity : Activity() {
             }
         }
         
-        val filter = IntentFilter("com.example.phphone.RELOAD")
+        val filter = IntentFilter()
+        filter.addAction("${packageName}.RELOAD")
+        filter.addAction("com.example.phphone.RELOAD")
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(reloadReceiver, filter, Context.RECEIVER_EXPORTED)
         } else {

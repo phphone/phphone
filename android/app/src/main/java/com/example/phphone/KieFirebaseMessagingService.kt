@@ -1,8 +1,3 @@
-/*
-// --- PUSH NOTIFICATIONS (PHPHONE) ---
-// Para activar Firebase, quita los comentarios de todo este archivo (borra los /* y */ de los extremos).
-// Asegúrate de haber colocado google-services.json en app/
-
 package com.example.phphone
 
 import android.app.NotificationChannel
@@ -62,4 +57,3 @@ class KieFirebaseMessagingService : FirebaseMessagingService() {
         notificationManager.notify(0, notificationBuilder.build())
     }
 }
-*/

@@ -47,8 +47,6 @@
         </activity>
         
         <!-- PUSH NOTIFICATIONS (PHPHONE) -->
-        <!-- Para activar Firebase, descomenta el siguiente bloque: -->
-        <!--
         <service
             android:name=".KieFirebaseMessagingService"
             android:exported="true">
@@ -56,7 +54,6 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        -->
         
         <!-- PHPHONE DAEMON SERVICE -->
         <service

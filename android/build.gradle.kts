@@ -5,6 +5,5 @@ plugins {
   alias(libs.plugins.kotlin.serialization) apply false
   
   // --- PUSH NOTIFICATIONS (PHPHONE) ---
-  // Para activar Firebase, descomenta la siguiente línea:
-  // id("com.google.gms.google-services") version "4.4.1" apply false
+  id("com.google.gms.google-services") version "4.4.1" apply false
 }

@@ -253,6 +253,34 @@ body {
 }
 ```
 
+### 4. 🔔 Configuración de Notificaciones Push (Firebase FCM)
+
+Phphone incluye soporte nativo listo para usar con Firebase Cloud Messaging (FCM) mediante `Phphone\Device::getPushToken()`.
+
+> [!IMPORTANT]
+> **Coincidencia de Package ID:** Al registrar la aplicación en la Consola de Firebase, el *Nombre del paquete Android (Package Name)* o *Bundle ID de iOS* debe ser **exactamente idéntico** al Package ID de tu proyecto Phphone. De lo contrario, Gradle rechazará el archivo `google-services.json`.
+>
+> 💡 **Si tu proyecto ya existe en Firebase con otro paquete:**
+> Puedes ajustar el Package ID de tu proyecto Phphone en los siguientes archivos:
+> - **Android:** [`android/app/build.gradle.kts`](file:///android/app/build.gradle.kts) ➔ Modifica la línea `applicationId = "com.tuempresa.tuapp"`
+> - **iOS:** [`ios/project.yml`](file:///ios/project.yml) o `phphone_meta.json` ➔ Modifica `"bundleId": "com.tuempresa.tuapp"`
+
+#### Para Android:
+1. En la [Consola de Firebase](https://console.firebase.google.com/), registra tu app con el Package ID de tu proyecto Phphone (ej: `com.phphone.miapp`).
+2. Descarga el archivo **`google-services.json`**.
+3. Guárdalo en la ruta de tu proyecto: `android/app/google-services.json`
+4. El compilador detectará el archivo de forma automática al compilar.
+
+#### Para iOS:
+1. En la Consola de Firebase, ve a **Configuración del Proyecto ⚙️** > **Tus aplicaciones** > **App iOS**.
+2. Descarga el archivo **`GoogleService-Info.plist`**.
+3. Guárdalo en la ruta de tu proyecto: `ios/App/GoogleService-Info.plist`
+
+#### Para tu Servidor Backend / API REST:
+1. En la Consola de Firebase, ve a **Configuración del Proyecto ⚙️** > pestaña **Cuentas de Servicio**.
+2. Haz clic en **Generar nueva clave privada** para descargar el archivo JSON del Admin SDK (`firebase-adminsdk-*.json`).
+3. Utiliza este archivo exclusivamente en tu servidor backend PHP/Node.js en producción para autenticar el envío de notificaciones hacia los teléfonos.
+
 <a id="installation"></a>
 ## ⚙️ Requisitos Previos (Entorno de Desarrollo)
 

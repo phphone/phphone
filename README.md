@@ -253,6 +253,34 @@ body {
 }
 ```
 
+### 4. 🔔 Push Notifications Setup (Firebase FCM)
+
+Phphone includes out-of-the-box native support for Firebase Cloud Messaging (FCM) via `Phphone\Device::getPushToken()`.
+
+> [!IMPORTANT]
+> **Package ID Match:** When registering your application in the Firebase Console, the *Android Package Name* or *iOS Bundle ID* must be **exactly identical** to your Phphone project Package ID. Otherwise, Gradle will reject the `google-services.json` file.
+>
+> 💡 **If your Firebase project already exists with a different package name:**
+> You can update the Package ID of your Phphone project in the following files:
+> - **Android:** [`android/app/build.gradle.kts`](file:///android/app/build.gradle.kts) ➔ Change `applicationId = "com.yourcompany.yourapp"`
+> - **iOS:** [`ios/project.yml`](file:///ios/project.yml) or `phphone_meta.json` ➔ Change `"bundleId": "com.yourcompany.yourapp"`
+
+#### For Android:
+1. In the [Firebase Console](https://console.firebase.google.com/), register your app with your Phphone project Package ID (e.g., `com.phphone.myapp`).
+2. Download the **`google-services.json`** file.
+3. Save it in your project directory at: `android/app/google-services.json`
+4. The compiler will automatically detect the file during build.
+
+#### For iOS:
+1. In the Firebase Console, go to **Project Settings ⚙️** > **Your apps** > **iOS App**.
+2. Download the **`GoogleService-Info.plist`** file.
+3. Save it in your project directory at: `ios/App/GoogleService-Info.plist`
+
+#### For your Backend Server / REST API:
+1. In the Firebase Console, go to **Project Settings ⚙️** > **Service accounts** tab.
+2. Click **Generate new private key** to download the Admin SDK JSON file (`firebase-adminsdk-*.json`).
+3. Use this file exclusively on your production PHP/Node.js backend server to authenticate outgoing notification requests to mobile devices.
+
 <a id="installation"></a>
 ## ⚙️ Prerequisites (Development Environment)
 

@@ -1,8 +1,9 @@
 plugins {
     id("com.android.application")
-    // --- PUSH NOTIFICATIONS (PHPHONE) ---
-    // Para activar Firebase, descomenta la siguiente línea:
-    // id("com.google.gms.google-services")
+}
+
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
 
 android {
@@ -60,9 +61,8 @@ dependencies {
     implementation("org.nanohttpd:nanohttpd:2.3.1")
     
     // --- PUSH NOTIFICATIONS (PHPHONE) ---
-    // Para activar Firebase, descomenta las siguientes líneas:
-    // implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
-    // implementation("com.google.firebase:firebase-messaging")
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-messaging")
 
     // --- IN APP PURCHASES (PHPHONE) ---
     // Para activar Compras Integradas, descomenta la siguiente línea:
