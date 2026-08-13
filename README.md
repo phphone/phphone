@@ -1,7 +1,8 @@
 # 📱 Phphone Compiler
 
 <p align="center">
-  <strong>Native Hybrid Framework & Compiler powering PHP 8.4 directly on Android & iOS devices.</strong>
+  <strong>Native Hybrid Framework & Compiler powering PHP 8.4 directly on Android & iOS devices.</strong><br><br>
+  <a href="https://ko-fi.com/stivmaster" target="_blank"><img src="https://img.shields.io/badge/Ko--fi-Support_Phphone-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support Phphone on Ko-fi"></a>
 </p>
 
 ---

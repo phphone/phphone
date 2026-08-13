@@ -10,7 +10,8 @@
 
 <p align="center">
   <strong>El Manifiesto Vanilla Mobile: Devolviendo la Libertad al Código.</strong><br>
-  Construye aplicaciones móviles híbridas de alto rendimiento para Android e iOS usando únicamente <b>PHP 8.4 Vanilla, HTML, CSS y JavaScript</b>. Sin Flutter, sin React Native, sin Electron y sin dependencias pesadas.
+  Construye aplicaciones móviles híbridas de alto rendimiento para Android e iOS usando únicamente <b>PHP 8.4 Vanilla, HTML, CSS y JavaScript</b>. Sin Flutter, sin React Native, sin Electron y sin dependencias pesadas.<br><br>
+  <a href="https://ko-fi.com/stivmaster" target="_blank"><img src="https://img.shields.io/badge/Ko--fi-Apoyar_Phphone-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Apoyar Phphone en Ko-fi"></a>
 </p>
 
 <p align="center">
