@@ -53,6 +53,18 @@ class KieWebServer(private val context: Context, port: Int) : NanoHTTPD("127.0.0
                     val resultJson = activity.cameraResult ?: "{\"error\":\"Unknown Camera error\"}"
                     response = newFixedLengthResponse(Response.Status.OK, "application/json", resultJson)
                 }
+                "/api/request-notification-permission" -> {
+                    val activity = context as MainActivity
+                    activity.notificationLatch = java.util.concurrent.CountDownLatch(1)
+                    
+                    Handler(Looper.getMainLooper()).post {
+                        activity.fetchNotificationPermission()
+                    }
+                    
+                    activity.notificationLatch?.await()
+                    val granted = activity.notificationResult
+                    response = newFixedLengthResponse(Response.Status.OK, "application/json", "{\"success\":$granted}")
+                }
                 "/api/notification" -> {
                     val activity = context as MainActivity
                     activity.notificationLatch = java.util.concurrent.CountDownLatch(1)

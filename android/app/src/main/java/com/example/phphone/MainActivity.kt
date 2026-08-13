@@ -122,7 +122,12 @@ class MainActivity : Activity() {
         copyAssetFolder("src", kieAppPath.absolutePath + "/src")
         android.util.Log.i("Phphone", "Archivos PHP nativos extraídos en: ${kieAppPath.absolutePath}")
 
-        // Iniciar el servidor local del puente de hardware
+        // --- SOLICITUD NATIVA DE PERMISOS PUSH (Android 13+ / API 33+) ---
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 103)
+            }
+        }
         try {
             localWebServer = KieWebServer(this, 8081)
             localWebServer?.start()
@@ -295,11 +300,27 @@ class MainActivity : Activity() {
                                     throw Exception("File not found on disk")
                                 }
                                 val mimeType = when {
-                                    assetPath.endsWith(".html") -> "text/html"
+                                    assetPath.endsWith(".html") || assetPath.endsWith(".htm") -> "text/html"
                                     assetPath.endsWith(".css") -> "text/css"
-                                    assetPath.endsWith(".js") -> "application/javascript"
+                                    assetPath.endsWith(".js") || assetPath.endsWith(".mjs") || assetPath.endsWith(".cjs") -> "application/javascript"
+                                    assetPath.endsWith(".json") || assetPath.endsWith(".map") -> "application/json"
                                     assetPath.endsWith(".png") -> "image/png"
                                     assetPath.endsWith(".jpg") || assetPath.endsWith(".jpeg") -> "image/jpeg"
+                                    assetPath.endsWith(".gif") -> "image/gif"
+                                    assetPath.endsWith(".svg") -> "image/svg+xml"
+                                    assetPath.endsWith(".webp") -> "image/webp"
+                                    assetPath.endsWith(".ico") -> "image/x-icon"
+                                    assetPath.endsWith(".woff") -> "font/woff"
+                                    assetPath.endsWith(".woff2") -> "font/woff2"
+                                    assetPath.endsWith(".ttf") -> "font/ttf"
+                                    assetPath.endsWith(".otf") -> "font/otf"
+                                    assetPath.endsWith(".wasm") -> "application/wasm"
+                                    assetPath.endsWith(".mp3") -> "audio/mpeg"
+                                    assetPath.endsWith(".wav") -> "audio/wav"
+                                    assetPath.endsWith(".ogg") -> "audio/ogg"
+                                    assetPath.endsWith(".mp4") -> "video/mp4"
+                                    assetPath.endsWith(".webm") -> "video/webm"
+                                    assetPath.endsWith(".pdf") -> "application/pdf"
                                     else -> "text/plain"
                                 }
                                 
@@ -310,7 +331,6 @@ class MainActivity : Activity() {
                                         try {
                                             val iv = bytes.copyOfRange(8, 24)
                                             val encrypted = bytes.copyOfRange(24, bytes.size)
-                                            
                                             val keyBytes = KieSecrets.AES_KEY_HEX.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
                                             val secretKeySpec = javax.crypto.spec.SecretKeySpec(keyBytes, "AES")
                                             val ivParameterSpec = javax.crypto.spec.IvParameterSpec(iv)

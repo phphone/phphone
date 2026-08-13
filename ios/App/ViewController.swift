@@ -530,20 +530,37 @@ class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerD
             ])!
         }
         
+        if path == "/api/request-notification-permission" {
+            let sem = DispatchSemaphore(value: 0)
+            var grantedResult = false
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                grantedResult = granted
+                sem.signal()
+            }
+            _ = sem.wait(timeout: .now() + 60.0)
+            return GCDWebServerDataResponse(jsonObject: ["success": grantedResult])!
+        }
+        
         if path == "/api/notification" {
             let params = request.query ?? [:]
             let title = params["title"] ?? "Phphone"
-            let msg = params["msg"] ?? "Notificación"
+            let msg = params["msg"] ?? params["body"] ?? "Notificación"
+            let tag = params["tag"] ?? params["id"]
+            let group = params["group"] ?? params["thread_id"]
             
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
                 if granted {
                     let content = UNMutableNotificationContent()
                     content.title = title
                     content.body = msg
                     content.sound = .default
+                    if let group = group, !group.isEmpty {
+                        content.threadIdentifier = group
+                    }
                     
+                    let identifier = (tag != nil && !tag!.isEmpty) ? tag! : UUID().uuidString
                     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.5, repeats: false)
-                    let req = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+                    let req = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
                     UNUserNotificationCenter.current().add(req)
                 }
             }
@@ -922,14 +939,27 @@ class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerD
     private func getMimeType(forPath path: String) -> String {
         let ext = URL(fileURLWithPath: path).pathExtension.lowercased()
         switch ext {
-        case "html": return "text/html"
+        case "html", "htm": return "text/html"
         case "css": return "text/css"
-        case "js": return "application/javascript"
+        case "js", "mjs", "cjs": return "application/javascript"
+        case "json", "map": return "application/json"
         case "png": return "image/png"
         case "jpg", "jpeg": return "image/jpeg"
         case "gif": return "image/gif"
         case "svg": return "image/svg+xml"
-        case "json": return "application/json"
+        case "webp": return "image/webp"
+        case "ico": return "image/x-icon"
+        case "woff": return "font/woff"
+        case "woff2": return "font/woff2"
+        case "ttf": return "font/ttf"
+        case "otf": return "font/otf"
+        case "wasm": return "application/wasm"
+        case "mp3": return "audio/mpeg"
+        case "wav": return "audio/wav"
+        case "ogg": return "audio/ogg"
+        case "mp4": return "video/mp4"
+        case "webm": return "video/webm"
+        case "pdf": return "application/pdf"
         default: return "application/octet-stream"
         }
     }
@@ -1307,6 +1337,19 @@ extension Data {
         decryptedData.count = numBytesDecrypted
         return decryptedData
     }
+
+    func decryptAES256Bound(keyHex: String, bundleId: String = "com.example.phphone") -> Data? {
+        let combined = keyHex + bundleId
+        if let combinedData = combined.data(using: .utf8) {
+            var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+            combinedData.withUnsafeBytes {
+                _ = CC_SHA256($0.baseAddress, CC_LONG(combinedData.count), &hash)
+            }
+            let derivedKeyHex = hash.map { String(format: "%02hhx", $0) }.joined()
+            return self.decryptAES256(keyHex: derivedKeyHex)
+        }
+        return self.decryptAES256(keyHex: keyHex)
+    }
 }
 
 extension String {
@@ -1327,5 +1370,5 @@ extension String {
 
 struct KieSecrets {
     static let isEncrypted = true
-    static let aesKeyHex = "940a5e2a826ea816721dd7f63756f5e695196039648d6a2453522a1ec3367daa"
+    static let aesKeyHex = "086e7911d4238ace84000ba807f69b50777e9d11db210701022e0197d529bc56"
 }

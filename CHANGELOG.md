@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- **FCM Push Notifications:** Dynamic Android notification accumulation, replacement via `tag`/`id`, WhatsApp-style bundling via `group`/`thread_id`, and native **Direct Reply** support via `"reply": true`.
+- **Seamless Navigation:** `SingleTop` activity intent handling for push notifications to prevent app re-initialization and splash screen reload.
 - GitHub Actions pipeline for automated builds.
 
 ## [v1.0.0] - 2026-07-22

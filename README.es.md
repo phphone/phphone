@@ -194,6 +194,60 @@ window.addEventListener('nativeScroll', (e) => {
 
 ---
 
+## 🔒 Gestión Dinámica de Permisos Bajo Demanda (Just-In-Time)
+
+Phphone sigue la filosofía de **Permisos Mínimos y Bajo Demanda (Just-In-Time)**. Las aplicaciones creadas con Phphone no solicitan permisos al abrir la aplicación, sino únicamente cuando el desarrollador o el usuario ejecuta activamente la funcionalidad desde su código PHP.
+
+### 💡 Ejemplo Práctico 1: Solicitar Permiso de Notificaciones antes de enviar una alerta
+
+```php
+use Phphone\Device;
+
+// Paso 1: Pedir el permiso nativo al usuario (Android 13+ / iOS)
+$permisoConcedido = Device::requestNotificationPermission();
+
+if ($permisoConcedido) {
+    // Paso 2: Si el usuario aceptó, enviamos la notificación
+    Device::notification("¡Bienvenido!", "Gracias por activar las notificaciones");
+} else {
+    // Si denegó el permiso, mostramos un mensaje flotante nativo sin bloquear la app
+    Device::toast("No podremos enviarte alertas porque rechazaste el permiso");
+}
+```
+
+### 💡 Ejemplo Práctico 2: Tomar una foto usando Permisos dinámicos o explícitos
+
+```php
+use Phphone\Device;
+
+// Opción A: Verificación previa con requestPermission
+if (Device::requestPermission('camera')) {
+    $fotoBase64 = Device::camera();
+    if ($fotoBase64) {
+        Device::toast("Foto capturada con éxito");
+    }
+} else {
+    Device::toast("Se requiere acceso a la cámara");
+}
+
+// Opción B: Llamada directa (Device::camera() solicita permiso automáticamente si no fue concedido)
+$fotoBase64 = Device::camera();
+```
+
+### 📋 Referencia de Permisos Soportados (`Device::requestPermission($tipo)`)
+
+| Tipo `$tipo` | Permiso Nativo Android | Permiso Nativo iOS | Descripción |
+| :--- | :--- | :--- | :--- |
+| `'notifications'` | `POST_NOTIFICATIONS` | `UNUserNotificationCenter` | Notificaciones flotantes y Push. |
+| `'gps'` | `ACCESS_FINE_LOCATION` | `CoreLocation` | Coordenadas latitud/longitud. |
+| `'camera'` | `CAMERA` | `AVFoundation` | Captura de fotografías. |
+| `'microphone'` | `RECORD_AUDIO` | `AVAudioSession` | Grabación de audio. |
+| `'contacts'` | `READ_CONTACTS` | `Contacts` | Lista de contactos. |
+| `'storage'` | `READ_EXTERNAL_STORAGE` / Picker | `UIDocumentPicker` | Archivos e imágenes del disco. |
+| `'biometric'` | `BiometricPrompt` | `LocalAuthentication` | Face ID, Touch ID y Huella. |
+
+---
+
 ## 🎨 Guía de Diseño y Configuración (UI/UX)
 
 Para que tus aplicaciones en Phphone se sientan verdaderamente nativas y no como "páginas web envueltas", sigue estas recomendaciones clave:
@@ -280,6 +334,107 @@ Phphone incluye soporte nativo listo para usar con Firebase Cloud Messaging (FCM
 1. En la Consola de Firebase, ve a **Configuración del Proyecto ⚙️** > pestaña **Cuentas de Servicio**.
 2. Haz clic en **Generar nueva clave privada** para descargar el archivo JSON del Admin SDK (`firebase-adminsdk-*.json`).
 3. Utiliza este archivo exclusivamente en tu servidor backend PHP/Node.js en producción para autenticar el envío de notificaciones hacia los teléfonos.
+
+#### 📌 Motor Nativo y Especificación de Payloads Push (Android & iOS)
+
+Phphone incluye un **Parser/Motor Nativo Unificado de Notificaciones**. Esto permite al desarrollador controlar el comportamiento nativo de las notificaciones directamente desde el payload JSON de su backend en PHP/Node.js **sin tocar nada de código nativo (Kotlin / Swift)**:
+
+- **Experiencia de Usuario Optimizada (Single-Top):** Al tocar cualquier notificación con la app abierta o en segundo plano, la aplicación vuelve al frente de forma fluida en Android y en iOS sin reiniciar la WebView ni volver a mostrar el splash screen.
+
+##### 📋 Especificación de Parámetros Estándar (`data` / `notification`)
+
+| Campo | Tipo | Descripción | Comportamiento Nativo |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Título principal de la notificación. | Muestra el título en negrita. |
+| `body` | `string` | Contenido del mensaje. | Texto descriptivo de la notificación. |
+| `tag` / `id` | `string` | *(Opcional)* Identificador único de reemplazo. | Si se envía, la notificación **actualiza/reemplaza** a la anterior con el mismo ID. Si se omite, **se acumulan**. |
+| `group` / `thread_id` | `string` | *(Opcional)* Clave de grupo. | Agrupa las notificaciones colapsadas (Android `Group Summary`, iOS `threadIdentifier`). |
+| `route` / `url` | `string` | *(Opcional)* Ruta de navegación en la WebApp. | Se pasa como parámetro extra a la app para navegar al tocar la notificación. |
+| `reply` | `boolean` / `string` | *(Opcional)* Respuesta directa (`true`). | Añade un campo de texto y botón nativo *"Responder"* en la propia notificación. |
+
+---
+
+##### 💡 Ejemplos Prácticos de Payloads (Backend / PHP)
+
+###### Caso 1: Notificaciones que se ACUMULAN (Ej: Recordatorios / Avisos)
+*Simplemente **omite** el parámetro `tag`.* Cada mensaje recibido creará una tarjeta independiente en la barra de tareas.
+
+```json
+{
+  "notification": {
+    "title": "Recordatorio de Tarea",
+    "body": "Tienes una reunión pendiente a las 3:00 PM"
+  }
+}
+```
+
+###### Caso 2: Notificaciones que se SOBREPONEN / REEMPLAZAN (Ej: Estado de Pedido / Progreso)
+*Envía un `tag` o `id` constante.* Si el `tag` es idéntico, la notificación anterior se actualiza (ej: de *"En preparación"* a *"En camino"*).
+
+```json
+{
+  "notification": {
+    "title": "Estado del Pedido #1052",
+    "body": "Tu pedido ya está en camino 🚚"
+  },
+  "data": {
+    "tag": "pedido_1052"
+  }
+}
+```
+
+###### Caso 3: Notificaciones AGRUPADAS estilo WhatsApp / Gmail (Ej: Hilos de Chat)
+*Envía varios mensajes con el mismo `group` o `thread_id` (y con `tag`s distintos) para que se empaqueten juntos dentro de un contenedor desplegable.*
+
+**Primer envío (Mensaje 1):**
+```json
+{
+  "notification": {
+    "title": "Carlos Ramírez",
+    "body": "Hola, ¿tienes 5 minutos?"
+  },
+  "data": {
+    "group": "chat_carlos_99",
+    "tag": "msg_1001"
+  }
+}
+```
+
+**Segundo envío (Mensaje 2, unos segundos después):**
+```json
+{
+  "notification": {
+    "title": "Carlos Ramírez",
+    "body": "¿Revisaste el borrador del proyecto?"
+  },
+  "data": {
+    "group": "chat_carlos_99",
+    "tag": "msg_1002"
+  }
+}
+```
+
+📱 **Resultado en el dispositivo:**
+Android e iOS empaquetan automáticamente ambos avisos bajo un mismo encabezado **"Carlos Ramírez (2 mensajes)"**, permitiendo al usuario desplegar la lista o ver cada mensaje individualmente exactamente como en WhatsApp, Telegram o Gmail.
+
+###### Caso 4: Notificaciones con RESPUESTA DIRECTA (Direct Reply)
+*Envía `"reply": true` dentro del objeto `data`.* El sistema nativo colocará un botón y campo de texto *"Responder"* en la propia notificación.
+
+```json
+{
+  "notification": {
+    "title": "Soporte Técnico",
+    "body": "¿Se resolvió tu problema con el servicio?"
+  },
+  "data": {
+    "reply": true,
+    "tag": "ticket_501"
+  }
+}
+```
+
+💬 **Resultado en el dispositivo:**
+El usuario podrá presionar **"Responder"** directamente en la notificación de Android o iOS, escribir su texto (ej: *"Sí, todo perfecto, gracias"*) y enviar la respuesta sin abrir la aplicación.
 
 <a id="installation"></a>
 ## ⚙️ Requisitos Previos (Entorno de Desarrollo)

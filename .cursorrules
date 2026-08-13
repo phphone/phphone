@@ -1,0 +1,9 @@
+# Phphone Workspace Rules
+
+Refer to [.agents/AGENTS.md](.agents/AGENTS.md) for full project conventions and rules.
+
+- Language Stack: PHP 8.4, HTML5, CSS3, JavaScript, Kotlin, Swift, C++.
+- Encrypted Build Command: `phphone build apk --release`
+- Never encrypt media assets (`png`, `jpg`, `mp3`, `mp4`, `ttf`, `sqlite`).
+- Never encrypt `src/Phphone/Device.php` (OpenSource SDK Bridge).
+- Keep `.env` and source code protected with AES-256 in release mode.

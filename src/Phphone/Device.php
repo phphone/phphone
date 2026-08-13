@@ -37,6 +37,37 @@ class Device {
     }
 
     /**
+     * Solicita bajo demanda el permiso nativo de Notificaciones Push (Android 13+ / iOS)
+     */
+    public static function requestNotificationPermission(): bool {
+        return self::requestPermission('notifications');
+    }
+
+    /**
+     * Método Maestro Genérico de Solicitud de Permisos Nativo Bajo Demanda (Just-In-Time)
+     * @param string $type Tipo de permiso: 'notifications', 'gps', 'camera', 'microphone', 'contacts', 'storage', 'biometric'
+     * @return bool True si el permiso fue concedido
+     */
+    public static function requestPermission(string $type): bool {
+        $endpoints = [
+            'notifications' => '/api/request-notification-permission',
+            'gps'           => '/api/gps',
+            'camera'        => '/api/camera',
+            'microphone'    => '/api/mic/start',
+            'contacts'      => '/api/contacts',
+            'storage'       => '/api/filepicker',
+            'biometric'     => '/api/biometric'
+        ];
+
+        $endpoint = $endpoints[strtolower($type)] ?? '/api/request-notification-permission';
+        $context = stream_context_create(['http' => ['timeout' => 60]]);
+        $response = @file_get_contents(self::BRIDGE_URL . $endpoint, false, $context);
+        if ($response === false) return false;
+        $data = json_decode($response, true);
+        return isset($data['success']) ? (bool)$data['success'] : !isset($data['error']);
+    }
+
+    /**
      * Obtiene las coordenadas GPS actuales
      * Pide permisos dinámicos automáticamente.
      * @return array|false Retorna ['lat' => float, 'lng' => float] o false si el usuario denegó permisos
