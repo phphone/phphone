@@ -1370,5 +1370,5 @@ extension String {
 
 struct KieSecrets {
     static let isEncrypted = true
-    static let aesKeyHex = "086e7911d4238ace84000ba807f69b50777e9d11db210701022e0197d529bc56"
+    static let aesKeyHex = "b8fc39fe1114c96b4a32b73e12d59038ac7aa4a1b430b674b75bf2c5fdbcd1c1"
 }
