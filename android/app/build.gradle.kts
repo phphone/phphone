@@ -75,8 +75,51 @@ val phphoneSourceDir = if (project.hasProperty("phphoneSourceDir")) {
     "../../src"
 }
 
+// Cargar reglas dinámicas de .phphoneignore si existe
+val ignorePatterns = mutableListOf<String>()
+// Exclusiones universales estándar
+ignorePatterns.addAll(listOf(
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/.svn/**",
+    "**/.idea/**",
+    "**/.vscode/**",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/*.log"
+))
+
+val ignoreFiles = listOf(
+    file("../../.phphoneignore"),
+    file("../../src/.phphoneignore")
+)
+
+for (ignoreFile in ignoreFiles) {
+    if (ignoreFile.exists()) {
+        ignoreFile.readLines().forEach { rawLine ->
+            val line = rawLine.trim()
+            if (line.isNotEmpty() && !line.startsWith("#")) {
+                val clean = line.removePrefix("./").removePrefix("/")
+                if (clean.endsWith("/")) {
+                    val dirName = clean.removeSuffix("/")
+                    ignorePatterns.add("**/$dirName/**")
+                } else if (clean.contains("*")) {
+                    ignorePatterns.add("**/$clean")
+                } else {
+                    ignorePatterns.add("**/$clean")
+                    ignorePatterns.add("**/$clean/**")
+                }
+            }
+        }
+    }
+}
+
 tasks.register<Sync>("syncPhpAssets") {
-    from(phphoneSourceDir)
+    from(phphoneSourceDir) {
+        ignorePatterns.distinct().forEach { pattern ->
+            exclude(pattern)
+        }
+    }
     into("src/main/assets/src")
 }
 
