@@ -178,8 +178,44 @@ phphone create MyApp
 phphone run
 
 # Build release APK / App Bundle
-phphone build android
+phphone build apk --release
 ```
+
+---
+
+## 🚫 `.phphoneignore` File (Build & Packaging Optimization)
+
+When using modern frontend tooling like **Vite, Webpack, TypeScript, Tailwind, or npm**, your workspace can accumulate hundreds of megabytes in `node_modules/`, raw `.ts` source files, and configuration files that are not needed inside the final mobile binary (`.apk`, `.aab`, `.ipa`).
+
+To prevent slow compilation and keep builds lightweight, create a `.phphoneignore` file at your project root (generated automatically on `phphone create`):
+
+```text
+# Phphone Ignore Rules
+# Files and directories excluded from APK/IPA encryption and packaging
+
+# Dependencies & frontend tooling
+node_modules/
+package.json
+package-lock.json
+vite.config.*
+tsconfig.json
+.eslintrc*
+.prettierrc*
+
+# Unprocessed source files & raw assets
+raw-assets/
+src/src/
+*.ts
+*.tsx
+*.scss
+
+# System & log files
+*.log
+.DS_Store
+Thumbs.db
+```
+
+The compiler and hot-reload engines (`phphone build` / `phphone run`) will automatically skip these files during scanning, AES-256 encryption, and device synchronization.
 
 ---
 

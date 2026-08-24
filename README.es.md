@@ -679,6 +679,42 @@ Cuando compilas tu aplicación en modo **Release** (APK de producción con encri
 
 ---
 
+## 🚫 Archivo `.phphoneignore` (Optimización de Empaquetado y Compilación)
+
+Si utilizas herramientas de frontend modernas como **Vite, Webpack, TypeScript, Tailwind o npm**, tu proyecto puede acumular cientos de megabytes en `node_modules/`, archivos fuente `.ts`, scripts y archivos de configuración que no son necesarios dentro del binario final (`.apk`, `.aab`, `.ipa`).
+
+Para evitar compilaciones lentas y empaquetar únicamente lo esencial, puedes crear un archivo `.phphoneignore` en la raíz de tu proyecto (o se generará automáticamente al usar `phphone create`):
+
+```text
+# Phphone Ignore Rules
+# Archivos y directorios que NO se empaquetan ni cifran en el APK / App
+
+# Dependencias y herramientas
+node_modules/
+package.json
+package-lock.json
+vite.config.*
+tsconfig.json
+.eslintrc*
+.prettierrc*
+
+# Fuentes no procesados y raw assets de Vite/Webpack
+raw-assets/
+src/src/
+*.ts
+*.tsx
+*.scss
+
+# Logs y temporales del sistema
+*.log
+.DS_Store
+Thumbs.db
+```
+
+El compilador y el sistema de hot-reload (`phphone build` / `phphone run`) omitirán instantáneamente estos archivos durante el escaneo, cifrado AES-256 y sincronización hacia el dispositivo o simulador.
+
+---
+
 <a id="support"></a>
 ## 💖 Apoya el Proyecto (GitHub Sponsors)
 
