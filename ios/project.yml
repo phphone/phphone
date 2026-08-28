@@ -14,30 +14,9 @@ targets:
           TARGET_DIR="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/src"
           SRC_DIR="${PHPHONE_SRC_DIR:-${SRCROOT}/../src}"
           echo "Syncing Phphone Assets from ${SRC_DIR} to ${TARGET_DIR}"
+          rm -rf "${TARGET_DIR}"
           mkdir -p "${TARGET_DIR}"
-          
-          PHPHONE_IGNORE_PROJECT="${SRCROOT}/../.phphoneignore"
-          PHPHONE_IGNORE_SRC="${SRCROOT}/../src/.phphoneignore"
-          
-          EXCLUDE_ARGS=(
-            "--exclude=node_modules"
-            "--exclude=.git"
-            "--exclude=.svn"
-            "--exclude=.idea"
-            "--exclude=.vscode"
-            "--exclude=.DS_Store"
-            "--exclude=Thumbs.db"
-            "--exclude=*.log"
-          )
-          
-          if [ -f "$PHPHONE_IGNORE_PROJECT" ]; then
-            EXCLUDE_ARGS+=("--exclude-from=$PHPHONE_IGNORE_PROJECT")
-          fi
-          if [ -f "$PHPHONE_IGNORE_SRC" ]; then
-            EXCLUDE_ARGS+=("--exclude-from=$PHPHONE_IGNORE_SRC")
-          fi
-          
-          rsync -a --delete "${EXCLUDE_ARGS[@]}" "${SRC_DIR}/" "${TARGET_DIR}/"
+          cp -R "${SRC_DIR}/"* "${TARGET_DIR}/"
     settings:
       base:
         INFOPLIST_FILE: App/Info.plist
