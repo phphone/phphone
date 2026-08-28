@@ -104,7 +104,7 @@ swiftc -target "$TARGET" -sdk "$SDK_PATH" \
     "${OBJS[@]}" "$LIBPHP" "$LIBSSL" "$LIBCRYPTO" "$LIBCURL" \
     -lc++ \
     -lresolv -lsqlite3 -lz \
-    -framework Foundation -framework UIKit -framework WebKit -framework CoreLocation -framework UserNotifications -framework MobileCoreServices \
+    -framework Foundation -framework UIKit -framework WebKit -framework CoreLocation -framework CoreMotion -framework UserNotifications -framework MobileCoreServices \
     -o "$BUILD_DIR/Phphone"
 
 echo "📱 Creating app bundle..."

@@ -1,6 +1,7 @@
 import UIKit
 import WebKit
 import CoreLocation
+import CoreMotion
 import UserNotifications
 import BackgroundTasks
 #if canImport(Darwin)
@@ -393,7 +394,7 @@ class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerD
         if path == "/api/gyroscope/start" {
             if !self.isGyroRunning && self.motionManager.isGyroAvailable {
                 self.motionManager.gyroUpdateInterval = 1.0 / 60.0 // 60 FPS
-                self.motionManager.startGyroUpdates(to: .main) { (data, error) in
+                self.motionManager.startGyroUpdates(to: OperationQueue.main) { (data, error) in
                     if let gyroData = data {
                         self.currentGyroX = gyroData.rotationRate.x
                         self.currentGyroY = gyroData.rotationRate.y
