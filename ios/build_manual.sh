@@ -107,24 +107,47 @@ swiftc -target "$TARGET" -sdk "$SDK_PATH" \
     -framework Foundation -framework UIKit -framework WebKit -framework CoreLocation -framework CoreMotion -framework UserNotifications -framework MobileCoreServices \
     -o "$BUILD_DIR/Phphone"
 
-echo "📱 Creating app bundle..."
-APP_BUNDLE="$BUILD_DIR/Phphone.app"
-rm -rf "$APP_BUNDLE"
+# Read metadata if available
+META_FILE="phphone_meta.json"
+APP_NAME="Phphone"
+BUNDLE_ID="com.phphone.Phphone"
+
+if [ -f "$META_FILE" ]; then
+    PARSED_NAME=$(grep -o '"app_name": *"[^"]*"' "$META_FILE" | head -1 | sed 's/"app_name": *"//;s/"//')
+    PARSED_PKG=$(grep -o '"package_name": *"[^"]*"' "$META_FILE" | head -1 | sed 's/"package_name": *"//;s/"//')
+    if [ -n "$PARSED_NAME" ]; then APP_NAME="$PARSED_NAME"; fi
+    if [ -n "$PARSED_PKG" ]; then BUNDLE_ID="$PARSED_PKG"; fi
+fi
+
+echo "📱 Creating app bundle ($APP_NAME - $BUNDLE_ID)..."
+APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
+rm -rf "$BUILD_DIR/"*.app
 mkdir -p "$APP_BUNDLE"
 
 # Copy executable
-cp "$BUILD_DIR/Phphone" "$APP_BUNDLE/Phphone"
+cp "$BUILD_DIR/Phphone" "$APP_BUNDLE/$APP_NAME"
 
 # Copy and process Info.plist
-sed -e 's/\$(EXECUTABLE_NAME)/Phphone/g' \
+sed -e "s/\$(EXECUTABLE_NAME)/$APP_NAME/g" \
     -e 's/\$(DEVELOPMENT_LANGUAGE)/en/g' \
     -e 's/\$(PRODUCT_BUNDLE_PACKAGE_TYPE)/APPL/g' \
-    -e 's/\$(PRODUCT_NAME)/Phphone/g' \
-    -e 's/\$(PRODUCT_BUNDLE_IDENTIFIER)/com.phphone.Phphone/g' \
+    -e "s/\$(PRODUCT_NAME)/$APP_NAME/g" \
+    -e "s/\$(PRODUCT_BUNDLE_IDENTIFIER)/$BUNDLE_ID/g" \
     App/Info.plist > "$APP_BUNDLE/Info.plist"
 
 # Copy PkgInfo
 echo -n "APPL????" > "$APP_BUNDLE/PkgInfo"
+
+# Compile and copy App Icons & Splash assets via actool if available
+if command -v actool >/dev/null 2>&1 && [ -d "App/Assets.xcassets" ]; then
+    echo "🎨 Compiling App Icons & Assets..."
+    actool "App/Assets.xcassets" \
+        --compile "$APP_BUNDLE" \
+        --platform iphonesimulator \
+        --minimum-deployment-target 12.0 \
+        --app-icon AppIcon \
+        --output-partial-info-plist "$BUILD_DIR/partial-info.plist" >/dev/null 2>&1 || true
+fi
 
 # Copy resources/assets (src directory)
 echo "📁 Copying assets..."
