@@ -459,12 +459,12 @@ Nuestros scripts de instalación hacen todo el trabajo duro por ti (descargar, d
 
 - **Mac/Linux:**
   ```bash
-  curl -sS https://phphone.org/install.sh | bash
+  curl -sS https://phphone.xyz/install.sh | bash
   ```
 - **Windows (PowerShell):**
   Abre PowerShell como administrador y ejecuta:
   ```powershell
-  irm https://phphone.org/install.ps1 | iex
+  irm https://phphone.xyz/install.ps1 | iex
   ```
 
 **Opción B: Instalación Local (Vía Composer)**
