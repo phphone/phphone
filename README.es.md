@@ -11,7 +11,9 @@
 <p align="center">
   <strong>El Manifiesto Vanilla Mobile: Devolviendo la Libertad al Código.</strong><br>
   Construye aplicaciones móviles híbridas de alto rendimiento para Android e iOS usando únicamente <b>PHP 8.4 Vanilla, HTML, CSS y JavaScript</b>. Sin Flutter, sin React Native, sin Electron y sin dependencias pesadas.<br><br>
-  <a href="https://ko-fi.com/stivmaster" target="_blank"><img src="https://img.shields.io/badge/Ko--fi-Apoyar_Phphone-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Apoyar Phphone en Ko-fi"></a>
+  <a href="https://packagist.org/packages/phphone/phphone" target="_blank"><img src="https://img.shields.io/packagist/v/phphone/phphone?color=6366F1&label=Packagist&logo=composer" alt="Versión Packagist"></a>
+  <a href="https://packagist.org/packages/phphone/phphone" target="_blank"><img src="https://img.shields.io/packagist/dt/phphone/phphone?color=10B981&label=Descargas" alt="Descargas Totales"></a>
+  <a href="https://ko-fi.com/stivmaster" target="_blank"><img src="https://img.shields.io/badge/Ko--fi-Apoyar_Phphone-ff5e5b?logo=ko-fi&logoColor=white" alt="Apoyar Phphone en Ko-fi"></a>
 </p>
 
 <p align="center">
@@ -485,8 +487,17 @@ Nuestros scripts de instalación hacen todo el trabajo duro por ti (descargar, d
   irm https://phphone.xyz/install.ps1 | iex
   ```
 
-**Opción B: Instalación Local (Vía Composer)**
-Si prefieres no instalar nada globalmente o aislar tu entorno, puedes clonar el repositorio e instalar las dependencias localmente:
+**Opción B: Vía Composer (Paquete Oficial en Packagist)**
+Si prefieres inicializar proyectos directamente a través de Composer:
+```bash
+composer create-project phphone/phphone mi-tienda
+cd mi-tienda
+# Ejecutas con el orquestador local incluido:
+php cli/bin/phphone run
+```
+
+**Opción C: Clonación Manual de Código Fuente**
+Si deseas clonar el repositorio e instalar las dependencias manualmente:
 ```bash
 git clone https://github.com/stevenrojas888/phphone.git mi-tienda
 cd mi-tienda/cli
