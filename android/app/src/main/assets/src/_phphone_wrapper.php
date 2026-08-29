@@ -6,7 +6,7 @@ if (!class_exists("PhphoneDecryptWrapper")) {
     private $aesKey;
 
     public function stream_open($path, $mode, $options, &$opened_path) {
-        $this->aesKey = hex2bin("086e7911d4238ace84000ba807f69b50777e9d11db210701022e0197d529bc56");
+        $this->aesKey = hex2bin("74ed658b135febcb67512f27a1adddfa7857b21db1aae3f125af5dbb5f260c4a");
         stream_wrapper_restore("file");
         
         // Si es un modo de escritura o append, simplemente pasamos el stream nativo transparente
