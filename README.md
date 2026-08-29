@@ -100,6 +100,24 @@ Our core philosophy is **Vanilla PHP / HTML / JS / CSS**. However, Phphone's arc
 - **Routing & Relative Paths:** While the local backend listens on `http://127.0.0.1:8081`, **you never need to hardcode this IP in your markup**. Write HTML/PHP using standard relative paths (`<a href="/newgradient.php">`). The native container resolves them automatically, ensuring your codebase remains 100% portable if ports change dynamically.
 - **Backend Packages (Composer) & Full Frameworks:** You are free to use `composer` for third-party packages. Thanks to the raw efficiency of the C++ runtime, **you can run complete frameworks like Laravel or Symfony directly inside the user's mobile device**. Yes, embedded local Laravel execution with zero remote servers. **CRITICAL REQUIREMENT:** Packages must be written in **pure PHP**. Dependencies requiring native C system compilation are **not compatible** with the embedded runtime.
 
+### 🛠️ Modern Bundlers Pipeline (TypeScript, React, Vue, Vite) & `.phphoneignore`
+If you use modern frontend toolchains requiring prior compilation (such as TypeScript, Vite, Tailwind CLI, or Webpack), the workflow is seamless:
+
+1. **Build Your Frontend:** Write your source code in TypeScript (`.ts`) or components and execute your standard build step (e.g. `npm run build` or `npx tsc`) to emit final `.js` and `.css` bundles inside your project assets directory (e.g., `src/js/`).
+2. **Exclude PC Development Bloat with `.phphoneignore`:** Create a `.phphoneignore` file in the root of your Phphone project to instruct the compiler which files to strip before packaging mobile binaries:
+   ```text
+   # .phphoneignore
+   node_modules/
+   package.json
+   package-lock.json
+   tsconfig.json
+   vite.config.js
+   src_ts/
+   tests/
+   .git/
+   ```
+3. **Run or Build:** When executing `phphone run` or `phphone build apk --release`, the compiler reads `.phphoneignore`, discards development overhead, and exclusively packages your clean JavaScript and PHP backend runtime. This keeps **your final production app under 20 MB**.
+
 ---
 
 ## 🔐 Security Best Practices (Mandatory Reading)

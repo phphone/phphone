@@ -1,0 +1,23 @@
+# Phphone Packaging Exclusions
+# Archivos y carpetas ignorados al compilar el APK/IPA móvil
+
+# Frontend Bundlers & Toolchains
+node_modules/
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+tsconfig.json
+vite.config.js
+vite.config.ts
+webpack.config.js
+src_ts/
+
+# Pruebas, Documentación & Entorno
+tests/
+.git/
+.github/
+.idea/
+.vscode/
+*.log
+.DS_Store

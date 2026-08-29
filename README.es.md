@@ -100,6 +100,24 @@ Nuestra filosofía principal es **Vanilla PHP / HTML / JS / CSS**. Sin embargo, 
 - **Enrutado y Rutas Relativas (Dato Técnico):** Aunque el servidor corre en `http://127.0.0.1:8081`, **no necesitas hardcodear esta IP en tu código**. Escribe HTML/PHP usando rutas relativas tradicionales (`<a href="/newgradient.php">`). El contenedor nativo las resuelve automáticamente, asegurando que tu código sea 100% portable y a prueba de fallos si el puerto cambia.
 - **Librerías Backend (Composer) y Frameworks Pesados:** Eres libre de usar `composer` para importar paquetes de terceros. Gracias a la brutal eficiencia del motor C++, **puedes correr frameworks completos como Laravel o Symfony directamente en el celular del usuario**. Sí, Laravel embebido y procesado localmente, sin servidores externos. Esto cambia las reglas del juego en el ecosistema móvil. **IMPORTANTE:** Solo puedes usar paquetes que estén escritos en **PHP puro**. Si una dependencia requiere compilar extensiones de C en el sistema operativo, **no será compatible** con el motor integrado.
 
+### 🛠️ Flujo con Bundlers (TypeScript, React, Vue, Vite) y `.phphoneignore`
+Si utilizas herramientas modernas que requieren transpilación previa (como TypeScript, Vite, Tailwind CLI o Webpack), el flujo de trabajo es sumamente ágil:
+
+1. **Compila tu Frontend:** Escribe tu código en TypeScript (`.ts`) o componentes y ejecuta tu comando habitual de transpilación (ej. `npm run build` o `npx tsc`) para emitir los archivos `.js` y `.css` finales listos dentro de tu carpeta del proyecto (ej: `src/js/`).
+2. **Excluye dependencias de PC con `.phphoneignore`:** Crea un archivo llamado `.phphoneignore` en la raíz de tu proyecto para indicarle al compilador de Phphone qué carpetas no deben empaquetarse en el binario móvil final:
+   ```text
+   # .phphoneignore
+   node_modules/
+   package.json
+   package-lock.json
+   tsconfig.json
+   vite.config.js
+   src_ts/
+   tests/
+   .git/
+   ```
+3. **Ejecuta o Empaqueta:** Al correr `phphone run` o `phphone build apk --release`, el compilador leerá `.phphoneignore`, omitirá la basura de desarrollo y empaquetará únicamente tu JavaScript limpio y el runtime PHP. De esta forma, **tu app final se mantiene por debajo de los 20 MB**.
+
 ---
 
 ## 🔐 Mejores Prácticas de Seguridad (Lectura Obligatoria)
