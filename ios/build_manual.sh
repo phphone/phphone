@@ -139,14 +139,17 @@ sed -e "s/\$(EXECUTABLE_NAME)/$APP_NAME/g" \
 echo -n "APPL????" > "$APP_BUNDLE/PkgInfo"
 
 # Compile and copy App Icons & Splash assets via actool if available
-if command -v actool >/dev/null 2>&1 && [ -d "App/Assets.xcassets" ]; then
+if [ -d "App/Assets.xcassets" ]; then
     echo "🎨 Compiling App Icons & Assets..."
-    actool "App/Assets.xcassets" \
+    xcrun actool "App/Assets.xcassets" \
         --compile "$APP_BUNDLE" \
         --platform iphonesimulator \
+        --target-device iphone \
+        --target-device ipad \
         --minimum-deployment-target 12.0 \
         --app-icon AppIcon \
-        --output-partial-info-plist "$BUILD_DIR/partial-info.plist" >/dev/null 2>&1 || true
+        --output-format human-readable-text \
+        --output-partial-info-plist "$BUILD_DIR/partial-info.plist" || true
 fi
 
 # Copy resources/assets (src directory)

@@ -37,19 +37,20 @@ class PassthroughWebView: WKWebView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard !isHidden && alpha > 0 else { return nil }
         
-        var insideUI = false
+        // Si no hay rectángulos restringidos (modo normal), responder a todos los toques normalmente
+        if uiRects.isEmpty {
+            return super.hitTest(point, with: event)
+        }
+        
+        // Si hay rectángulos de UI activos (modo InAppBrowser con WebView trasero),
+        // solo interceptar los toques dentro de los elementos de UI definidos
         for rect in uiRects {
             if rect.contains(point) {
-                insideUI = true
-                break
+                return super.hitTest(point, with: event)
             }
         }
         
-        if !insideUI {
-            return nil
-        }
-        
-        return super.hitTest(point, with: event)
+        return nil
     }
 }
 
