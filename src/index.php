@@ -86,7 +86,7 @@ if (strpos($uri, 'action=') !== false) {
     }
 
     if (strpos($uri, 'action=share') !== false) {
-        $success = \Phphone\Device::share("¡Mira esta increíble app desarrollada con Phphone y PHP!", "https://php.net");
+        $success = \Phphone\Device::share("¡Estoy desarrollando apps móviles nativas usando PHP puro con Phphone! 🚀📱", "https://phphone.xyz");
         echo json_encode(['success' => $success]);
         return;
     }
