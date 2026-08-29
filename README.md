@@ -104,7 +104,7 @@ Our core philosophy is **Vanilla PHP / HTML / JS / CSS**. However, Phphone's arc
 If you use modern frontend toolchains requiring prior compilation (such as TypeScript, Vite, Tailwind CLI, or Webpack), the workflow is seamless:
 
 1. **Build Your Frontend:** Write your source code in TypeScript (`.ts`) or components and execute your standard build step (e.g. `npm run build` or `npx tsc`) to emit final `.js` and `.css` bundles inside your project assets directory (e.g., `src/js/`).
-2. **Exclude PC Development Bloat with `.phphoneignore`:** Create a `.phphoneignore` file in the root of your Phphone project to instruct the compiler which files to strip before packaging mobile binaries:
+2. **Exclude PC Development Bloat with `.phphoneignore`:** Your project comes out of the box with a preconfigured `.phphoneignore` in the root directory to instruct the compiler which files to strip before packaging mobile binaries:
    ```text
    # .phphoneignore
    node_modules/

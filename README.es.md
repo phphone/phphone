@@ -104,7 +104,7 @@ Nuestra filosofía principal es **Vanilla PHP / HTML / JS / CSS**. Sin embargo, 
 Si utilizas herramientas modernas que requieren transpilación previa (como TypeScript, Vite, Tailwind CLI o Webpack), el flujo de trabajo es sumamente ágil:
 
 1. **Compila tu Frontend:** Escribe tu código en TypeScript (`.ts`) o componentes y ejecuta tu comando habitual de transpilación (ej. `npm run build` o `npx tsc`) para emitir los archivos `.js` y `.css` finales listos dentro de tu carpeta del proyecto (ej: `src/js/`).
-2. **Excluye dependencias de PC con `.phphoneignore`:** Crea un archivo llamado `.phphoneignore` en la raíz de tu proyecto para indicarle al compilador de Phphone qué carpetas no deben empaquetarse en el binario móvil final:
+2. **Excluye dependencias de PC con `.phphoneignore`:** Tu proyecto ya incluye de fábrica un archivo `.phphoneignore` en la raíz con las exclusiones estándar para evitar empaquetar archivos de desarrollo en el binario móvil:
    ```text
    # .phphoneignore
    node_modules/
