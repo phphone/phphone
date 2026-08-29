@@ -1,0 +1,44 @@
+{
+    "name": "phphone/phphone",
+    "description": "Next-Generation PHP-Native Hybrid Framework and Compiler for Android, iOS, and Desktop with Embedded PHP 8.4 runtime.",
+    "type": "project",
+    "keywords": [
+        "php",
+        "phphone",
+        "mobile",
+        "android",
+        "ios",
+        "framework",
+        "compiler",
+        "embedded-php",
+        "hybrid",
+        "sqlite"
+    ],
+    "homepage": "https://phphone.xyz",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Steven Rojas",
+            "email": "stevenrojas888@gmail.com",
+            "homepage": "https://phphone.xyz",
+            "role": "Creator & Lead Developer"
+        }
+    ],
+    "support": {
+        "docs": "https://phphone.xyz/docs",
+        "issues": "https://github.com/stevenrojas888/phphone/issues",
+        "source": "https://github.com/stevenrojas888/phphone"
+    },
+    "require": {
+        "php": ">=8.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Phphone\\": "src/Phphone/",
+            "Phphone\\Cli\\": "cli/src/"
+        }
+    },
+    "bin": [
+        "cli/bin/phphone"
+    ]
+}
