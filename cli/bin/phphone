@@ -1,0 +1,18 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Phphone CLI - Orquestador Global para Phphone
+ * Este ejecutable interactúa con el sistema operativo para gestionar proyectos.
+ */
+
+if (php_sapi_name() !== 'cli') {
+    die("phphone debe ejecutarse desde la línea de comandos.\n");
+}
+
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../src/helpers.php';
+
+use Phphone\Cli\App;
+
+$app = new App();
+$app->run($argv);
