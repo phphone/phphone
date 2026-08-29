@@ -12,9 +12,9 @@ if (strpos($uri, 'action=') !== false) {
     if (strpos($uri, 'action=toast') !== false) {
         $messages = [
             "¡El hardware es nuestro! 🚀",
-            "PHP controlando Kotlin 🤯",
-            "Super Controlador activado ⚡",
-            "¡Phphone es el futuro! 🏔️"
+            "PHP Real en tu Móvil con Phphone ⚡",
+            "Phphone Native Bridge Activo 📱",
+            "¡Phphone es el futuro del desarrollo móvil! 🏔️"
         ];
         $randomMsg = $messages[array_rand($messages)];
         \Phphone\Device::toast($randomMsg);
@@ -189,8 +189,8 @@ if (strpos($uri, 'action=') !== false) {
 
     <main class="container">
         <div>
-            <h1>Super Control</h1>
-            <p class="subtitle">PHP ➔ Kotlin ➔ Hardware</p>
+            <h1>Phphone Super Control</h1>
+            <p class="subtitle">PHP ➔ Phphone Bridge ➔ Hardware</p>
         </div>
 
         <button class="btn btn-toast" onclick="triggerHardware('toast')">
@@ -275,6 +275,16 @@ if (strpos($uri, 'action=') !== false) {
         </div>
     </main>
 
+    <!-- Modal SweetAlert-like para respuestas rápidas -->
+    <div id="phphone-alert-modal" class="custom-modal-backdrop" onclick="closePhphoneAlert(event)">
+        <div class="custom-modal-card" onclick="event.stopPropagation()">
+            <div id="phphone-alert-icon" class="custom-modal-icon">✨</div>
+            <h3 id="phphone-alert-title" class="custom-modal-title">Título</h3>
+            <div id="phphone-alert-body" class="custom-modal-body">Contenido del mensaje</div>
+            <button class="custom-modal-btn" onclick="closePhphoneAlert()">Aceptar</button>
+        </div>
+    </div>
+
     <!-- Modal de Contactos -->
     <div id="contacts-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
         <div style="background:var(--bg-color); width:100%; max-width:400px; max-height:80vh; border-radius:15px; border:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; overflow:hidden;">
@@ -289,6 +299,17 @@ if (strpos($uri, 'action=') !== false) {
     </div>
 
     <script>
+        function showPhphoneAlert(title, message, icon = "✨") {
+            document.getElementById('phphone-alert-icon').innerText = icon;
+            document.getElementById('phphone-alert-title').innerText = title;
+            document.getElementById('phphone-alert-body').innerHTML = message;
+            document.getElementById('phphone-alert-modal').classList.add('active');
+        }
+
+        function closePhphoneAlert() {
+            document.getElementById('phphone-alert-modal').classList.remove('active');
+        }
+
         let flashState = false;
         async function toggleFlashlight() {
             flashState = !flashState;
@@ -357,13 +378,15 @@ if (strpos($uri, 'action=') !== false) {
                 try {
                     data = JSON.parse(textData);
                 } catch (e) {
-                    alert("Respuesta no es JSON. Recibido:\n" + textData.substring(0, 100));
+                    showPhphoneAlert("Error", "Respuesta no es JSON.<br>" + textData.substring(0, 100), "⚠️");
                     return;
                 }
 
                 if (!data.success) {
-                    statusEl.innerText = "Error: " + (data.error || "Desconocido");
+                    const errMsg = data.error || "Desconocido";
+                    statusEl.innerText = "Error: " + errMsg;
                     statusEl.className = "status-text status-error";
+                    showPhphoneAlert("Error en Operación", errMsg, "❌");
                     return;
                 }
 
@@ -371,30 +394,49 @@ if (strpos($uri, 'action=') !== false) {
 
                 if (action === 'vibrate') {
                     statusEl.innerText = `Ritmo: ${data.rhythm}`;
+                    showPhphoneAlert("Vibración Ejecutada", `Patrón enviado:<br><strong>${data.rhythm}</strong>`, "📳");
                 } else if (action === 'toast') {
                     statusEl.innerText = "¡Toast enviado al OS!";
                 } else if (action === 'gps') {
+                    const gpsText = `Latitud: <strong>${data.lat}</strong><br>Longitud: <strong>${data.lng}</strong>`;
                     statusEl.innerText = `📍 Coordenadas: ${data.lat}, ${data.lng}`;
+                    showPhphoneAlert("Ubicación GPS Obtenida", gpsText, "📍");
                 } else if (action === 'notification') {
                     statusEl.innerText = "🔔 Notificación empujada con éxito.";
+                    showPhphoneAlert("Notificación Local", "¡Notificación push emitida exitosamente por el sistema operativo!", "🔔");
                 } else if (action === 'camera' || action === 'pickimage') {
                     statusEl.innerText = "📸 ¡Imagen recibida en Base64!";
                     imgEl.src = "data:image/jpeg;base64," + data.image;
                     imgContainer.style.display = 'block';
+                    imgContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else if (action === 'biometric') {
                     statusEl.innerText = "🔒 ¡Identidad verificada exitosamente!";
+                    showPhphoneAlert("Autenticación Biométrica", "¡Identidad verificada exitosamente con FaceID / TouchID / Huella!", "🛡️");
                 } else if (action === 'share') {
                     statusEl.innerText = "📤 Share sheet abierto";
                 } else if (action === 'battery') {
+                    const battMsg = `Nivel actual: <strong>${data.level}%</strong><br>Estado: <strong>${data.isCharging ? '⚡ Cargando' : '🔋 En batería'}</strong>`;
                     statusEl.innerText = `🔋 Batería: ${data.level}% | Cargando: ${data.isCharging ? 'Sí' : 'No'}`;
+                    showPhphoneAlert("Estado de Batería", battMsg, "🔋");
                 } else if (action === 'network') {
+                    const netMsg = `Conectividad actual: <strong>${data.status.toUpperCase()}</strong>`;
                     statusEl.innerText = `📡 Red: ${data.status.toUpperCase()}`;
+                    showPhphoneAlert("Estado de Red", netMsg, "📡");
                 } else if (action === 'clipboard') {
-                    statusEl.innerText = data.text ? `📋 Leído: ${data.text}` : "📋 ¡Texto guardado!";
+                    if (data.text) {
+                        statusEl.innerText = `📋 Leído: ${data.text}`;
+                        showPhphoneAlert("Portapapeles Leído", `Contenido recuperado:<br><code style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px;">${data.text}</code>`, "📋");
+                    } else {
+                        statusEl.innerText = "📋 ¡Texto guardado!";
+                        showPhphoneAlert("Portapapeles", "¡Texto copiado exitosamente al portapapeles nativo!", "📋");
+                    }
                 } else if (action === 'flashlight') {
                     statusEl.innerText = `🔦 Linterna: ${flashState ? 'Encendida' : 'Apagada'}`;
+                    showPhphoneAlert("Linterna", `La linterna nativa fue <strong>${flashState ? 'encendida' : 'apagada'}</strong>.`, "🔦");
                 } else if (action === 'info') {
+                    const infoMsg = `Dispositivo: <strong>${data.data.model}</strong><br>Versión OS: <strong>${data.data.os_version}</strong><br>UUID: <small>${data.data.uuid || 'N/A'}</small>`;
                     statusEl.innerText = `📱 Dispositivo: ${data.data.model} (OS: ${data.data.os_version})`;
+                    showPhphoneAlert("Información del Dispositivo", infoMsg, "📱");
                 } else if (action === 'daemon') {
                     // Start daemon using the native bridge
                     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -408,6 +450,7 @@ if (strpos($uri, 'action=') !== false) {
                         }
                     }
                     statusEl.innerText = "👻 Demonio nativo disparado desde JS a segundo plano.";
+                    showPhphoneAlert("Demonio en Segundo Plano", "Servicio en segundo plano programado exitosamente vía BGTaskScheduler.", "👻");
                 } else if (action === 'contacts') {
                     statusEl.innerText = `👥 ${data.contacts.length} contactos leídos.`;
                     const modal = document.getElementById('contacts-modal');
@@ -451,6 +494,7 @@ if (strpos($uri, 'action=') !== false) {
                 console.error(err);
                 statusEl.innerText = "Error de red local";
                 statusEl.className = "status-text status-error";
+                showPhphoneAlert("Error de Red", "No se pudo conectar con el puente nativo local.", "⚠️");
             }
         }
     </script>

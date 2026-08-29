@@ -126,3 +126,84 @@ p.subtitle {
 .status-success { display: block; color: #10b981; }
 .status-error { display: block; color: var(--danger); }
 .status-loading { display: block; color: #eab308; }
+
+/* Modal SweetAlert-like popup */
+.custom-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-modal-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.custom-modal-card {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 340px;
+    padding: 24px 20px 20px 20px;
+    text-align: center;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-modal-backdrop.active .custom-modal-card {
+    transform: scale(1) translateY(0);
+}
+
+.custom-modal-icon {
+    font-size: 2.8rem;
+    margin-bottom: 8px;
+}
+
+.custom-modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    color: #fff;
+}
+
+.custom-modal-body {
+    font-size: 1rem;
+    color: #cbd5e1;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    word-break: break-word;
+}
+
+.custom-modal-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    color: #fff;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 14px;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    transition: transform 0.15s, opacity 0.15s;
+}
+
+.custom-modal-btn:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+}
