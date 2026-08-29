@@ -24,5 +24,26 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: "Phphone v1.0.0 - Embedded PHP 8.4 Engine"
+          body: |
+            ## 🐘 Phphone v1.0.0 - Production Release
+
+            We are thrilled to announce the official release of **Phphone v1.0.0** — The Next-Generation PHP-Native Hybrid Framework and Compiler for Android, iOS, and Desktop.
+
+            ### 🚀 Highlights & Features:
+            - **Embedded PHP 8.4 Runtime:** Executes full PHP scripts, APIs, and business logic directly on the physical mobile processor with zero cloud latency.
+            - **Phphone Native Bridge™ (`Phphone\Device`):** Hardware integration for Camera, GPS, Biometrics (Face ID/Touch ID), Haptic Vibration, Flashlight, Push Notifications (FCM), and Keystore storage.
+            - **AES-256 Signature-Bound Encryption:** Enterprise-grade code protection decrypting PHP controllers directly in RAM.
+            - **Integrated SQLite3 Engine:** Fast, encrypted relational persistence without external drivers.
+            - **Dual WebView Architecture:** Layered rendering allowing seamless external web loads without CORS/X-Frame-Options friction.
+            - **Preconfigured `.phphoneignore`:** Eliminates frontend bundler overhead (TS, Vite, Webpack), keeping compiled mobile apps under 20 MB.
+
+            ### 📦 CLI Installation:
+            - **Windows (PowerShell):** `irm https://phphone.xyz/install.ps1 | iex`
+            - **macOS / Linux:** `curl -sS https://phphone.xyz/install.sh | bash`
+
+            ### 📖 Documentation:
+            Explore the official interactive documentation at [https://phphone.xyz/docs](https://phphone.xyz/docs).
           files: phphone-release.zip
-          generate_release_notes: true
+          draft: false
+          prerelease: false
