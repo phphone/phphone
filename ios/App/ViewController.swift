@@ -11,6 +11,7 @@ import LocalAuthentication
 import AVFoundation
 import Network
 import SafariServices
+import Contacts
 /*
 // --- PUSH NOTIFICATIONS (PHPHONE) ---
 import FirebaseCore
@@ -847,6 +848,52 @@ class ViewController: UIViewController, WKNavigationDelegate, CLLocationManagerD
                 uuid = UIDevice.current.identifierForVendor?.uuidString ?? "unknown"
             }
             return GCDWebServerDataResponse(jsonObject: ["success": true, "model": model, "os_version": osVer, "uuid": uuid])!
+        }
+
+        if path == "/api/contacts" {
+            let store = CNContactStore()
+            let sem = DispatchSemaphore(value: 0)
+            var contactsArray: [[String: String]] = []
+            
+            store.requestAccess(for: .contacts) { granted, error in
+                if granted {
+                    let keysToFetch: [CNKeyDescriptor] = [
+                        CNContactGivenNameKey as CNKeyDescriptor,
+                        CNContactFamilyNameKey as CNKeyDescriptor,
+                        CNContactPhoneNumbersKey as CNKeyDescriptor
+                    ]
+                    let request = CNContactFetchRequest(keysToFetch: keysToFetch)
+                    request.sortOrder = .userDefault
+                    do {
+                        try store.enumerateContacts(with: request) { contact, _ in
+                            let fullName = "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespaces)
+                            let name = fullName.isEmpty ? "Sin Nombre" : fullName
+                            let phone = contact.phoneNumbers.first?.value.stringValue ?? ""
+                            if !phone.isEmpty {
+                                contactsArray.append(["name": name, "phone": phone])
+                            }
+                        }
+                    } catch {
+                        print("Error reading contacts: \(error)")
+                    }
+                }
+                sem.signal()
+            }
+            
+            _ = sem.wait(timeout: .now() + 5.0)
+            
+            // Si en el simulador no hay contactos configurados, proveer datos mock amigables para pruebas
+            #if targetEnvironment(simulator)
+            if contactsArray.isEmpty {
+                contactsArray = [
+                    ["name": "Steven Rojas", "phone": "+1 555-0199"],
+                    ["name": "Phphone Support", "phone": "+1 800-PHPHONE"],
+                    ["name": "Apple Simulator Contact", "phone": "+1 555-0123"]
+                ]
+            }
+            #endif
+            
+            return GCDWebServerDataResponse(jsonObject: contactsArray)!
         }
         
         // ==============================================================================

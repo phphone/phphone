@@ -313,7 +313,7 @@ if (strpos($uri, 'action=') !== false) {
         let flashState = false;
         async function toggleFlashlight() {
             flashState = !flashState;
-            await triggerHardware(`flashlight?on=${flashState}`);
+            await triggerHardware(`flashlight&on=${flashState}`);
         }
 
         let gyroLoopRunning = false;
