@@ -26,8 +26,8 @@
     ],
     "support": {
         "docs": "https://phphone.xyz/docs",
-        "issues": "https://github.com/stevenrojas888/phphone/issues",
-        "source": "https://github.com/stevenrojas888/phphone"
+        "issues": "https://github.com/phphone/phphone/issues",
+        "source": "https://github.com/phphone/phphone"
     },
     "require": {
         "php": ">=8.0.0"

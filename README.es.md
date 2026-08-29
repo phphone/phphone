@@ -499,7 +499,7 @@ php cli/bin/phphone run
 **Opción C: Clonación Manual de Código Fuente**
 Si deseas clonar el repositorio e instalar las dependencias manualmente:
 ```bash
-git clone https://github.com/stevenrojas888/phphone.git mi-tienda
+git clone https://github.com/phphone/phphone.git mi-tienda
 cd mi-tienda/cli
 composer install
 cd ..

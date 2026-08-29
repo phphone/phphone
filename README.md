@@ -499,7 +499,7 @@ php cli/bin/phphone run
 **Option C: Manual Git Clone & Setup**
 To isolate your environment manually from source:
 ```bash
-git clone https://github.com/stevenrojas888/phphone.git my-store
+git clone https://github.com/phphone/phphone.git my-store
 cd my-store/cli
 composer install
 cd ..

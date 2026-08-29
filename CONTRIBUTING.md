@@ -51,7 +51,7 @@ Antes de enviar un Pull Request, ten en cuenta estas directrices arquitectónica
 
 ### 4. 🚀 Flujo de Trabajo para Pull Requests (PR)
 
-1. **Haz un Fork** del repositorio oficial: `https://github.com/stevenrojas888/phphone`.
+1. **Haz un Fork** del repositorio oficial: `https://github.com/phphone/phphone`.
 2. **Clona tu Fork** en tu máquina local:
    ```bash
    git clone https://github.com/TU-USUARIO/phphone.git
@@ -70,7 +70,7 @@ Antes de enviar un Pull Request, ten en cuenta estas directrices arquitectónica
    git push origin feat/mi-nueva-funcionalidad
    ```
 6. **Abre el Pull Request (PR):**
-   - Ve a `https://github.com/stevenrojas888/phphone/pulls` y pulsa **New Pull Request**.
+   - Ve a `https://github.com/phphone/phphone/pulls` y pulsa **New Pull Request**.
    - Describe con claridad el problema que resuelves y los cambios realizados.
    - Adjunta capturas o logs de prueba si aplica.
 
@@ -117,7 +117,7 @@ Keep these foundational constraints in mind:
 
 ### 4. 🚀 Pull Request Workflow
 
-1. **Fork** the official repository: `https://github.com/stevenrojas888/phphone`.
+1. **Fork** the official repository: `https://github.com/phphone/phphone`.
 2. **Clone your fork** locally:
    ```bash
    git clone https://github.com/YOUR-USERNAME/phphone.git
@@ -134,7 +134,7 @@ Keep these foundational constraints in mind:
    git commit -m "feat: add support for XYZ"
    git push origin feat/my-awesome-feature
    ```
-6. **Open a Pull Request (PR)** on `https://github.com/stevenrojas888/phphone/pulls` with a clear explanation of what was added or resolved.
+6. **Open a Pull Request (PR)** on `https://github.com/phphone/phphone/pulls` with a clear explanation of what was added or resolved.
 
 ---
 
