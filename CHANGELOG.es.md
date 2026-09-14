@@ -11,6 +11,10 @@ y este proyecto se adhiere al [Versionamiento Semántico](https://semver.org/spe
 - **Navegación Fluida:** Soporte para `SingleTop` en intents de notificación, evitando reinicios de la app y recargas de splash al tocar avisos.
 - Pipeline de GitHub Actions para compilaciones automáticas.
 
+## [v1.0.2] - 2026-09-14
+### Seguridad & Conformidad
+- **Refuerzo de ATS (App Transport Security) en iOS:** Se reemplazó el permiso global inseguro `NSAllowsArbitraryLoads = true` por `NSAllowsLocalNetworking` y excepciones estrictas acotadas a `localhost` y `127.0.0.1`. Garantiza el cumplimiento total de las directrices de revisión de Apple App Store manteniendo la comunicación con el motor PHP embebido.
+
 ## [v1.0.0] - 2026-07-22
 ### Agregado
 - **CLI de Phphone**: Herramienta de consola global e inteligente para la gestión de proyectos (`create`, `run`, `build`, `setup`, `config`, etc).

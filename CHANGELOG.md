@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Seamless Navigation:** `SingleTop` activity intent handling for push notifications to prevent app re-initialization and splash screen reload.
 - GitHub Actions pipeline for automated builds.
 
+## [v1.0.2] - 2026-09-14
+### Security & Compliance
+- **iOS App Transport Security (ATS) Hardening:** Replaced global `NSAllowsArbitraryLoads = true` with granular `NSAllowsLocalNetworking` and domain exceptions strictly for `localhost` and `127.0.0.1`. Ensures full compliance with Apple App Store Review Guidelines while maintaining embedded PHP runtime communication.
+
 ## [v1.0.0] - 2026-07-22
 ### Added
 - **Phphone CLI**: Intelligent global command-line tool for project management (`create`, `run`, `build`, `setup`, `config`, etc).
