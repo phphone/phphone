@@ -24,11 +24,11 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "Phphone v1.0.0 - Embedded PHP 8.4 Engine"
+          name: "Phphone ${{ github.ref_name }} - Production Release"
           body: |
-            ## 🐘 Phphone v1.0.0 - Production Release
+            ## 🐘 Phphone ${{ github.ref_name }} - Production Release
 
-            We are thrilled to announce the official release of **Phphone v1.0.0** — The Next-Generation PHP-Native Hybrid Framework and Compiler for Android, iOS, and Desktop.
+            We are thrilled to announce the official release of **Phphone ${{ github.ref_name }}** — The Next-Generation PHP-Native Hybrid Framework and Compiler for Android, iOS, and Desktop.
 
             ### 🚀 Highlights & Features:
             - **Embedded PHP 8.4 Runtime:** Executes full PHP scripts, APIs, and business logic directly on the physical mobile processor with zero cloud latency.
