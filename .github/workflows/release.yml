@@ -21,29 +21,57 @@ jobs:
       - name: Create ZIP file
         run: zip -r phphone-release.zip . -x "*.git*" -x ".github/*" -x "node_modules/*"
 
+      - name: Extract Release Notes from Changelog
+        id: changelog
+        run: |
+          TAG="${{ github.ref_name }}"
+          CLEAN_TAG="${TAG#v}"
+          
+          # Extraer la sección del tag actual de CHANGELOG.md
+          awk -v tag="## \\[v?${CLEAN_TAG}\\]" '
+            $0 ~ tag {flag=1; next}
+            flag && /^## / {flag=0}
+            flag {print}
+          ' CHANGELOG.md > release_notes.md
+
+          # Si no se encontró nada, usar fallback
+          if [ ! -s release_notes.md ]; then
+            echo "See CHANGELOG.md for details." > release_notes.md
+          fi
+
+          cat << 'EOF' > release_body.md
+          ## 🐘 Phphone ${{ github.ref_name }} - Production Release
+
+          ### 🔓 What's New in ${{ github.ref_name }}
+          EOF
+
+          cat release_notes.md >> release_body.md
+
+          cat << 'EOF' >> release_body.md
+
+          ---
+
+          ### 🚀 Core Framework Highlights:
+          - **Embedded PHP 8.4 Runtime:** Executes full PHP scripts, APIs, and business logic directly on the physical mobile processor with zero cloud latency.
+          - **Phphone Native Bridge™ (`Phphone\Device`):** Hardware integration for Camera, GPS, Biometrics (Face ID/Touch ID), Haptic Vibration, Flashlight, Push Notifications (FCM), and Keystore storage.
+          - **AES-256 Signature-Bound Encryption:** Enterprise-grade code protection decrypting PHP controllers directly in RAM.
+          - **Integrated SQLite3 Engine:** Fast, encrypted relational persistence without external drivers.
+          - **Dual WebView Architecture:** Layered rendering allowing seamless external web loads without CORS/X-Frame-Options friction.
+          - **Preconfigured `.phphoneignore`:** Eliminates frontend bundler overhead (TS, Vite, Webpack), keeping compiled mobile apps under 20 MB.
+
+          ### 📦 CLI Installation:
+          - **Windows (PowerShell):** `irm https://phphone.xyz/install.ps1 | iex`
+          - **macOS / Linux:** `curl -sS https://phphone.xyz/install.sh | bash`
+
+          ### 📖 Documentation:
+          Explore the official interactive documentation at [https://phphone.xyz/docs](https://phphone.xyz/docs).
+          EOF
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: "Phphone ${{ github.ref_name }} - Production Release"
-          body: |
-            ## 🐘 Phphone ${{ github.ref_name }} - Production Release
-
-            We are thrilled to announce the official release of **Phphone ${{ github.ref_name }}** — The Next-Generation PHP-Native Hybrid Framework and Compiler for Android, iOS, and Desktop.
-
-            ### 🚀 Highlights & Features:
-            - **Embedded PHP 8.4 Runtime:** Executes full PHP scripts, APIs, and business logic directly on the physical mobile processor with zero cloud latency.
-            - **Phphone Native Bridge™ (`Phphone\Device`):** Hardware integration for Camera, GPS, Biometrics (Face ID/Touch ID), Haptic Vibration, Flashlight, Push Notifications (FCM), and Keystore storage.
-            - **AES-256 Signature-Bound Encryption:** Enterprise-grade code protection decrypting PHP controllers directly in RAM.
-            - **Integrated SQLite3 Engine:** Fast, encrypted relational persistence without external drivers.
-            - **Dual WebView Architecture:** Layered rendering allowing seamless external web loads without CORS/X-Frame-Options friction.
-            - **Preconfigured `.phphoneignore`:** Eliminates frontend bundler overhead (TS, Vite, Webpack), keeping compiled mobile apps under 20 MB.
-
-            ### 📦 CLI Installation:
-            - **Windows (PowerShell):** `irm https://phphone.xyz/install.ps1 | iex`
-            - **macOS / Linux:** `curl -sS https://phphone.xyz/install.sh | bash`
-
-            ### 📖 Documentation:
-            Explore the official interactive documentation at [https://phphone.xyz/docs](https://phphone.xyz/docs).
+          body_path: release_body.md
           files: phphone-release.zip
           draft: false
           prerelease: false
