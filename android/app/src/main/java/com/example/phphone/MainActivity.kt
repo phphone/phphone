@@ -407,6 +407,19 @@ class MainActivity : Activity() {
             registerReceiver(reloadReceiver, filter)
         }
 
+        // Navegación predictiva y botón atrás para Android 13+ (API 33+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT
+            ) {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    finish()
+                }
+            }
+        }
+
         // Disparamos la petición HTTP inicial (Auto-detección SPA Web o PHP nativo)
         if (File(kieAppPath, "src/index.html").exists()) {
             android.util.Log.i("Phphone", "index.html detectado, arrancando en modo SPA Web")

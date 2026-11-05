@@ -1,5 +1,12 @@
 {
     "app_name": "Phphone",
     "package_name": "com.example.phphone",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "ios": {
+        "deployment_target": "15.0"
+    },
+    "android": {
+        "min_sdk": 24,
+        "target_sdk": 36
+    }
 }

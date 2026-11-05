@@ -61,6 +61,15 @@ class RenameCommand implements CommandInterface {
             $this->renameIos($targetDir, $newName, $newPackage);
         }
 
+        // Actualizar phphone.json en la raíz si existe
+        $projectConfig = new \Phphone\Cli\ProjectConfig($targetDir);
+        if ($projectConfig->exists()) {
+            $projectConfig->set('name', $newName);
+            $projectConfig->set('package', $newPackage);
+            $projectConfig->save();
+            $projectConfig->syncNative();
+        }
+
         echo __('rename.success');
     }
 

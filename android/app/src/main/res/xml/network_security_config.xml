@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+    <!-- Phphone local runtime cleartext allowance -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
         <domain includeSubdomains="true">kie.local</domain>
     </domain-config>
-    <!-- Phphone default to allow all cleartext to enable P2P and local embedded server -->
-    <base-config cleartextTrafficPermitted="true" />
+    <!-- By default, all other traffic (HTTPS) strictly blocks cleartext for Google Play compliance -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
 </network-security-config>

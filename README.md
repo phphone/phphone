@@ -122,6 +122,56 @@ If you use modern frontend toolchains requiring prior compilation (such as TypeS
 
 ---
 
+## ⚙️ Declarative Project Configuration (`phphone.json`)
+
+Phphone projects feature a centralized **Single Source of Truth** file at the root: [`phphone.json`](file:///phphone.json). You don't need to manually edit `AndroidManifest.xml`, `project.yml`, or `Info.plist`. The Phphone compiler reads this file and automatically synchronizes all native build files on every `phphone run`, `phphone build`, or `phphone sync`:
+
+```json
+{
+    "name": "My App",
+    "package": "com.mycompany.myapp",
+    "version": "1.0.0",
+    "versionCode": 1,
+    "ios": {
+        "deploymentTarget": "15.0",
+        "backgroundModes": [
+            "fetch"
+        ],
+        "permissions": {
+            "camera": "This app requires camera access to take pictures or scan codes.",
+            "location": "This app requires location access to deliver personalized features.",
+            "microphone": "This app requires microphone access to record audio.",
+            "photoLibrary": "This app requires photo library access to upload photos.",
+            "contacts": "This app requires contacts access to display your agenda.",
+            "faceId": "This app requires Face ID to securely authenticate your identity."
+        }
+    },
+    "android": {
+        "minSdk": 24,
+        "targetSdk": 36
+    }
+}
+```
+
+### 📋 Configuration Fields Specification
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The display name of the application on the home screen. |
+| `package` | `string` | Unique application identifier / Bundle ID (e.g. `com.company.app`). |
+| `version` | `string` | User-facing version string (e.g. `1.0.0`). |
+| `versionCode` | `integer` | Incremental integer version code for store updates. |
+| `ios.deploymentTarget` | `string` | Minimum iOS version (defaults to `"15.0"` for modern App Store compliance). |
+| `ios.backgroundModes` | `array` | iOS Background modes (`fetch`, `audio`, etc.). Avoid `processing` unless justified. |
+| `ios.permissions` | `object` | Key-value pairs matching Apple's mandatory `UsageDescription` strings. |
+| `android.minSdk` | `integer` | Minimum Android API level supported (default `24` / Android 7.0). |
+| `android.targetSdk` | `integer` | Target Android API level for Google Play (default `36`). |
+
+> [!TIP]
+> **Manual Sync Command:** Run `phphone sync` at any time to immediately propagate your `phphone.json` changes to the native iOS and Android build environments.
+
+---
+
 ## 🔐 Security Best Practices (Mandatory Reading)
 
 > [!WARNING]  

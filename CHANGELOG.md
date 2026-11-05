@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- **Predictive Back Navigation & Modern Android Gesture Support:** Added `android:enableOnBackInvokedCallback="true"` and registered native `OnBackInvokedDispatcher` in `MainActivity.kt` for Android 13+ (API 33 to Android 16+). Native gestures automatically delegate to the WebView history stack (`canGoBack()` -> `goBack()`) with graceful exit on empty history.
+- **Documentation for SPA Navigation:** Added dedicated section explaining `pushState` vs `replaceState` and back gesture handling for single-page applications.
 - **FCM Push Notifications:** Dynamic Android notification accumulation, replacement via `tag`/`id`, WhatsApp-style bundling via `group`/`thread_id`, and native **Direct Reply** support via `"reply": true`.
 - **Seamless Navigation:** `SingleTop` activity intent handling for push notifications to prevent app re-initialization and splash screen reload.
 - GitHub Actions pipeline for automated builds.

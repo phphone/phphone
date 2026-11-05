@@ -200,6 +200,37 @@ class CreateCommand implements CommandInterface {
             file_put_contents($file, $content);
         }
 
+        // Create phphone.json at project root
+        $configPath = $targetDir . '/phphone.json';
+        $initialConfig = [
+            '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+            'name' => $newAppName,
+            'package' => $newPackage,
+            'version' => '1.0.0',
+            'versionCode' => 1,
+            'ios' => [
+                'deploymentTarget' => '15.0',
+                'backgroundModes' => ['fetch'],
+                'permissions' => [
+                    'camera' => 'This application requires camera access to take pictures or scan codes.',
+                    'location' => 'This application requires location access to deliver personalized features.',
+                    'microphone' => 'This application requires microphone access to record audio.',
+                    'photoLibrary' => 'This application requires photo library access to select and upload photos.',
+                    'contacts' => 'This application requires contacts access.',
+                    'faceId' => 'This application requires Face ID to authenticate your identity securely.',
+                ],
+            ],
+            'android' => [
+                'minSdk' => 24,
+                'targetSdk' => 36,
+            ],
+        ];
+        file_put_contents($configPath, json_encode($initialConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n");
+
+        // Synchronize with Android and iOS native project files
+        $projectConfig = new \Phphone\Cli\ProjectConfig($targetDir);
+        $projectConfig->syncNative();
+
         echo __('create.success', ['name' => $name]);
         echo __('create.hint_cd', ['name' => $name]);
         echo __('create.hint_run');

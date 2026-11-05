@@ -1,6 +1,5 @@
 <?php
 namespace Phphone;
-require_once dirname(__DIR__) . '/_phphone_wrapper.php';
 
 /**
  * Phphone Device API

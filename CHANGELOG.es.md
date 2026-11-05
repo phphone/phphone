@@ -7,6 +7,8 @@ y este proyecto se adhiere al [Versionamiento Semántico](https://semver.org/spe
 
 ## [Sin Publicar]
 ### Agregado
+- **Navegación Predictiva y Gestos de Retroceso Modernos en Android:** Se incorporó `android:enableOnBackInvokedCallback="true"` y el registro nativo de `OnBackInvokedDispatcher` en `MainActivity.kt` para Android 13+ (API 33 a Android 16+). Los gestos del sistema delegan automáticamente al historial del WebView (`canGoBack()` -> `goBack()`) con cierre limpio al vaciar el stack.
+- **Documentación de Navegación en SPAs:** Guía y recomendaciones de buenas prácticas para el manejo de `pushState` vs `replaceState` ante gestos nativos de retroceso.
 - **Notificaciones Push FCM:** Acumulación dinámica de notificaciones en Android, reemplazo por `tag`/`id`, agrupación tipo WhatsApp por `group`/`thread_id` y soporte nativo para **Respuesta Directa (Direct Reply)** con la clave `"reply": true`.
 - **Navegación Fluida:** Soporte para `SingleTop` en intents de notificación, evitando reinicios de la app y recargas de splash al tocar avisos.
 - Pipeline de GitHub Actions para compilaciones automáticas.

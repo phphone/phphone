@@ -1,0 +1,26 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Phphone Application Configuration",
+    "name": "Phphone",
+    "package": "com.example.phphone",
+    "version": "1.0.0",
+    "versionCode": 1,
+    "ios": {
+        "deploymentTarget": "15.0",
+        "backgroundModes": [
+            "fetch"
+        ],
+        "permissions": {
+            "camera": "This application requires camera access to take pictures or scan codes.",
+            "location": "This application requires location access to deliver personalized features.",
+            "microphone": "This application requires microphone access to record audio.",
+            "photoLibrary": "This application requires photo library access to select and upload photos.",
+            "contacts": "This application requires contacts access.",
+            "faceId": "This application requires Face ID to authenticate your identity securely."
+        }
+    },
+    "android": {
+        "minSdk": 24,
+        "targetSdk": 36
+    }
+}

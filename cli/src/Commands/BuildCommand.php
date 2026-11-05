@@ -24,6 +24,13 @@ class BuildCommand implements CommandInterface {
         echo __('build.start', ['type' => strtoupper($platform === 'ios' ? 'APP/IPA' : $type), 'mode' => $modeStr]);
 
         $projectRoot = getcwd();
+
+        // Sincronizar automáticamente phphone.json hacia Android e iOS si existe
+        $projectConfig = new \Phphone\Cli\ProjectConfig($projectRoot);
+        if ($projectConfig->exists()) {
+            $projectConfig->syncNative();
+        }
+
         $srcDir = $projectRoot . DIRECTORY_SEPARATOR . 'src';
         
         $encryptedSrcDir = $projectRoot . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . '.encrypted_src';

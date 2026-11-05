@@ -19,6 +19,7 @@ return [
     'app.help.cmd.sign' => '  phphone sign             - Generate keys and configure signing for production',
     'app.help.cmd.setup' => '  phphone setup            - Configure app icons and splash screen (usage: phphone setup [--bg="#HEX"])',
     'app.help.cmd.config' => '  phphone config           - Statically configures the native engine (screen orientation, zoom, etc.)',
+    'app.help.cmd.sync' => '  phphone sync             - Synchronizes phphone.json declarative settings with native Android/iOS files',
 
     // ConfigCommand
     'config.usage' => "Usage: phphone config <property> <value>\nExample: phphone config orientation portrait\nExample: phphone config zoom off\n",

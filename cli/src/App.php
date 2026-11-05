@@ -99,6 +99,17 @@ class App {
                     $this->showHelp();
                 }
                 break;
+            case 'sync':
+                $projectRoot = getcwd();
+                $config = new \Phphone\Cli\ProjectConfig($projectRoot);
+                if (!$config->exists()) {
+                    echo "❌ No se encontró phphone.json en la raíz del proyecto.\n";
+                } else {
+                    echo "🔄 Sincronizando phphone.json con las plataformas nativas...\n";
+                    $res = $config->syncNative();
+                    echo "✅ Sincronización finalizada (" . implode(', ', $res['synced'] ?? []) . ").\n";
+                }
+                break;
             default:
                 $this->showHelp();
                 break;

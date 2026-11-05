@@ -7,7 +7,7 @@ set -e
 
 SDK_PATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
 ARCH="arm64"
-TARGET="arm64-apple-ios12.0-simulator"
+TARGET="arm64-apple-ios15.0-simulator"
 BUILD_DIR="build_manual.nosync"
 PHP_BUILD_IOS="$(cd "$(dirname "$0")" && pwd)/build_ios"
 

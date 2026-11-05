@@ -25,6 +25,13 @@ class RunCommand implements CommandInterface
         }
 
         $projectRoot = getcwd();
+
+        // Sincronizar automáticamente phphone.json hacia Android e iOS si existe
+        $projectConfig = new \Phphone\Cli\ProjectConfig($projectRoot);
+        if ($projectConfig->exists()) {
+            $projectConfig->syncNative();
+        }
+
         $this->packageName = Platform::getAndroidPackageName($projectRoot);
         $this->iosBundleId = Platform::getIosBundleId($projectRoot);
         $this->remoteDir = '/data/data/' . $this->packageName . '/files/kie_app/';

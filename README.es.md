@@ -122,6 +122,56 @@ Si utilizas herramientas modernas que requieren transpilación previa (como Type
 
 ---
 
+## ⚙️ Configuración Declarativa del Proyecto (`phphone.json`)
+
+Los proyectos Phphone cuentan con un archivo central como **Fuente Única de Verdad** en la raíz: [`phphone.json`](file:///phphone.json). No necesitas editar manualmente `AndroidManifest.xml`, `project.yml` ni `Info.plist`. El compilador de Phphone lee este archivo y propaga automáticamente todos los cambios a los entornos nativos al ejecutar `phphone run`, `phphone build` o `phphone sync`:
+
+```json
+{
+    "name": "Mi App",
+    "package": "com.miempresa.miapp",
+    "version": "1.0.0",
+    "versionCode": 1,
+    "ios": {
+        "deploymentTarget": "15.0",
+        "backgroundModes": [
+            "fetch"
+        ],
+        "permissions": {
+            "camera": "Esta aplicación requiere acceso a la cámara para capturar fotos o escanear.",
+            "location": "Esta aplicación requiere acceso a la ubicación para proveer servicios personalizados.",
+            "microphone": "Esta aplicación requiere acceso al micrófono para grabar audio.",
+            "photoLibrary": "Esta aplicación requiere acceso a tu galería para adjuntar fotos.",
+            "contacts": "Esta aplicación requiere acceso a tus contactos.",
+            "faceId": "Esta aplicación requiere Face ID para autenticar tu identidad de forma segura."
+        }
+    },
+    "android": {
+        "minSdk": 24,
+        "targetSdk": 36
+    }
+}
+```
+
+### 📋 Especificación de Propiedades
+
+| Propiedad | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `name` | `string` | Nombre comercial de la aplicación visible en el teléfono. |
+| `package` | `string` | Identificador único de la app / Bundle ID (ej. `com.empresa.app`). |
+| `version` | `string` | Versión comercial visible para el usuario (ej. `1.0.0`). |
+| `versionCode` | `integer` | Código numérico entero incremental para actualizaciones en las tiendas. |
+| `ios.deploymentTarget` | `string` | Versión mínima de iOS compatible (por defecto `"15.0"` para cumplir con Apple). |
+| `ios.backgroundModes` | `array` | Modos de segundo plano de iOS (`fetch`, `audio`, etc.). Evita `processing` si no está justificado. |
+| `ios.permissions` | `object` | Claves y textos obligatorios de justificación (`UsageDescription`) para Apple App Store. |
+| `android.minSdk` | `integer` | Nivel mínimo de API de Android soportado (por defecto `24` / Android 7.0). |
+| `android.targetSdk` | `integer` | Nivel de API objetivo exigido por Google Play Store (por defecto `36`). |
+
+> [!TIP]
+> **Comando de Sincronización Manual:** Puedes ejecutar `phphone sync` en cualquier momento para propagar de inmediato los cambios de `phphone.json` a las carpetas nativas de iOS y Android.
+
+---
+
 ## 🔐 Mejores Prácticas de Seguridad (Lectura Obligatoria)
 
 > [!WARNING]  
