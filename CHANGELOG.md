@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v1.0.3] - 2026-11-05
 ### Added
 - **Predictive Back Navigation & Modern Android Gesture Support:** Added `android:enableOnBackInvokedCallback="true"` and registered native `OnBackInvokedDispatcher` in `MainActivity.kt` for Android 13+ (API 33 to Android 16+). Native gestures automatically delegate to the WebView history stack (`canGoBack()` -> `goBack()`) with graceful exit on empty history.
 - **Documentation for SPA Navigation:** Added dedicated section explaining `pushState` vs `replaceState` and back gesture handling for single-page applications.

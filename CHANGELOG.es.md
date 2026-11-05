@@ -5,7 +5,7 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere al [Versionamiento Semántico](https://semver.org/spec/v2.0.0.html).
 
-## [Sin Publicar]
+## [v1.0.3] - 2026-11-05
 ### Agregado
 - **Navegación Predictiva y Gestos de Retroceso Modernos en Android:** Se incorporó `android:enableOnBackInvokedCallback="true"` y el registro nativo de `OnBackInvokedDispatcher` en `MainActivity.kt` para Android 13+ (API 33 a Android 16+). Los gestos del sistema delegan automáticamente al historial del WebView (`canGoBack()` -> `goBack()`) con cierre limpio al vaciar el stack.
 - **Documentación de Navegación en SPAs:** Guía y recomendaciones de buenas prácticas para el manejo de `pushState` vs `replaceState` ante gestos nativos de retroceso.
